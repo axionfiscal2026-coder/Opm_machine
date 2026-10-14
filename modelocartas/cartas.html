@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM — Gerador de Cartas e Notificações</title>
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="cartas.css">
+    
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">OPERATOR MACHINE</span>
+        </div>
+        <button type="button" class="btn-voltar-topo" onclick="voltarParaGestao()" title="Voltar à Gestão">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Gestão
+        </button>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="content-area-full">
+        <div class="tab-content active">
+            
+            <!-- Grid de Cards de Seleção -->
+            <div id="cardsGridArea">
+                <div class="header-section">
+                    <span class="category-tag"><i class="fa-solid fa-folder-tree"></i> Modelos & Procedimentos</span>
+                    <h1><i class="fa-solid fa-envelope-open-text"></i> Gerador de Cartas e Notificações</h1>
+                    <p class="subtitle">Selecione uma das opções abaixo para acessar as ferramentas e gerar seus comunicados.</p>
+                </div>
+
+                <!-- Barra de Pesquisa de Modelos -->
+                <div class="search-bar-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Pesquisar modelo de carta por nome ou palavra-chave..." oninput="filtrarCards()">
+                </div>
+
+                <div class="cards-grid" id="cardsGrid">
+                    <div class="card-item" onclick="abrirGerador('carta-correcao', 'Carta de Correção')">
+                        <div class="card-item-icon color-correcao"><i class="fa-solid fa-file-signature"></i></div>
+                        <h3>Carta de Correção</h3>
+                        <p>Modelos para solicitação ou emissão de Carta de Correção Eletrônica (CC-e) simples ou com justificativa detalhada.</p>
+
+                        <div class="card-footer-action">
+                            <span>ACESSAR GERADOR</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="card-item" onclick="abrirGerador('prorrogacao-boleto', 'Prorrogação de Boleto')">
+                        <div class="card-item-icon color-prorrogacao"><i class="fa-solid fa-calendar-plus"></i></div>
+                        <h3>Prorrogação de Boleto</h3>
+                        <p>Solicitação de alteração da data de vencimento de títulos e boletos bancários.</p>
+
+                        <div class="card-footer-action">
+                            <span>ACESSAR GERADOR</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="card-item" onclick="abrirGerador('boleto-sem-registro', 'Boleto sem Registro')">
+                        <div class="card-item-icon color-boleto-sem-registro"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        <h3>Boleto sem Registro</h3>
+                        <p>Solicitação de envio de boleto ou dados bancários quando o título não consta no DDA.</p>
+
+                        <div class="card-footer-action">
+                            <span>ACESSAR GERADOR</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="card-item" onclick="abrirGerador('troca-verba', 'Troca de Verba')">
+                        <div class="card-item-icon color-troca-verba"><i class="fa-solid fa-right-left"></i></div>
+                        <h3>Troca de Verba</h3>
+                        <p>Solicitação de substituição da verba ou recurso vinculado à Nota Fiscal.</p>
+
+                        <div class="card-footer-action">
+                            <span>ACESSAR GERADOR</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="card-item" onclick="abrirGerador('validade-curta', 'Validade Curta')">
+                        <div class="card-item-icon color-validade"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <h3>Validade Curta</h3>
+                        <p>Notificação e tratativa para recebimento de produtos com vencimento próximo.</p>
+
+                        <div class="card-footer-action">
+                            <span>ACESSAR GERADOR</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de Geração da Carta -->
+            <div class="generator-card" id="generatorArea" style="display: none;">
+                <div class="generator-header">
+                    <button class="btn-cancel" onclick="fecharGerador()"><i class="fa-solid fa-arrow-left"></i> Voltar aos modelos</button>
+                    <h2 id="modalTitle">Gerador</h2>
+                    <div class="generator-header-actions" style="margin-left: auto; display: flex; gap: 8px;">
+                        <button type="button" class="reset-btn" id="btnLimparAtual" title="Limpar formulário" onclick="limparFormularioAtual()">
+                            <i class="fa-solid fa-rotate-left"></i> Limpar
+                        </button>
+                        <button type="button" class="lock-btn" id="btnEditarAtual" title="Alternar edição direta no texto" onclick="alternarEdicaoDiretaAtual()">
+                            <i class="fa-solid fa-lock"></i> Trancado
+                        </button>
+                    </div>
+                </div>
+                <div class="generator-body">
+                    <div class="form-side">
+                        <h3><i class="fa-solid fa-pen-to-square"></i> Preencha as Informações</h3>
+                        <div id="dynamicFields"></div>
+                    </div>
+                    <div class="preview-side">
+                        <h3><i class="fa-solid fa-eye"></i> Carta Gerada</h3>
+                        <div class="letter-box" id="letterOutput"></div>
+                        <button class="btn-save btn-copy-full" id="copyBtn" onclick="copiarCarta()"><i class="fa-solid fa-copy"></i> Copiar Carta</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL DE GERENCIAMENTO DE OPÇÕES -->
+    <div class="custom-modal-overlay" id="opcoesModal" style="display: none;">
+        <div class="custom-modal-box">
+            <div class="custom-modal-header">
+                <h3 id="modalOpcoesTitulo"><i class="fa-solid fa-list-check"></i> Gerenciar Opções</h3>
+                <button type="button" class="btn-close-modal" onclick="fecharModalOpcoes()">&times;</button>
+            </div>
+            <div class="custom-modal-body">
+                <label class="modal-input-label">Adicionar Nova Opção</label>
+                <div class="modal-add-row">
+                    <input type="text" id="novoItemOpcaoInput" placeholder="Ex: Inclusão de verba nos dados adicionais">
+                    <button type="button" class="btn-add-opcao" onclick="adicionarNovaOpcaoItem()"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+                <label class="modal-input-label" style="margin-top: 16px;">Opções Cadastradas:</label>
+                <ul class="modal-opcoes-list" id="modalOpcoesListaContainer">
+                    <!-- Gerado via JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Principal -->
+    <script src="cartas.js"></script>
+</body>
+</html>

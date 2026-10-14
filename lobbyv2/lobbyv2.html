@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM — OPERATOR MACHINE V2</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS do Lobby V2 -->
+    <link rel="stylesheet" href="lobbyv2.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM
+        </div>
+        <button type="button" class="btn-logout" onclick="fazerLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
+    </header>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="lobby-container">
+        <div class="lobby-header-text">
+            <h2>PAINEL PRINCIPAL DE GESTÃO</h2>
+            <p>Selecione o módulo que deseja acessar</p>
+        </div>
+
+        <!-- ESTRUTURA DO CARROSSEL COM SETAS LATERAIS -->
+        <div class="carousel-wrapper">
+            
+            <!-- SETA ESQUERDA TRANSPARENTE -->
+            <button type="button" class="carousel-nav-btn prev-btn" id="btnPrevLobby" onclick="mudarPaginaLobby(-1)" title="Anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <!-- CONTAINER DOS CARDS -->
+            <div class="cards-carousel-container">
+                <div class="lobby-cards-grid" id="lobbyCardsGrid">
+
+                    <!-- CARD 1: SOLICITAR URGÊNCIA -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('solicitacoes')">
+                        <div class="card-icon-box color-solicitacoes">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Solicitar Urgencia</h3>
+                            <p>Gerenciamento e controle do fluxo de nota fiscais e solicitações de urgencias.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: VISÃO GERAL -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('visao-geral')">
+                        <div class="card-icon-box color-visaogeral">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Visão Geral</h3>
+                            <p>Resumo consolidado das operações em andamento atualizadas em tempo real.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SETA DIREITA TRANSPARENTE -->
+            <button type="button" class="carousel-nav-btn next-btn" id="btnNextLobby" onclick="mudarPaginaLobby(1)" title="Próximo">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+        </div>
+
+        <!-- INDICADOR DE PÁGINAS EM PONTOS -->
+        <div class="pagination-dots" id="dotsContainer"></div>
+
+    </main>
+
+    <!-- JS do Lobby V2 -->
+    <script src="lobbyv2.js"></script>
+</body>
+</html>

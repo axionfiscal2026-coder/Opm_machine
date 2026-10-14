@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Operator Machine — Cronograma & Prioridades</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Específico -->
+    <link rel="stylesheet" href="cronograma.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">OPERATOR MACHINE</span>
+        </div>
+        <div class="top-bar-actions">
+            <button type="button" class="btn-voltar-topo" onclick="voltarParaGestao()" title="Voltar à Gestão de Notas Fiscais">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="content-area-full">
+        
+        <!-- TÍTULO CENTRALIZADO -->
+        <h2 class="page-main-title">CRONOGRAMA E PRIORIDADES</h2>
+
+        <!-- NAVEGAÇÃO POR EMPRESA/UNIDADE: ANTENOR DUARTE / FILIAIS -->
+        <div class="tabs-container-empresa">
+            <button type="button" class="tab-empresa-btn active" id="tab-empresa-antenor" onclick="trocarAbaEmpresa('antenor')">
+                <i class="fa-solid fa-building"></i> ANTENOR DUARTE VILELA
+            </button>
+            <button type="button" class="tab-empresa-btn" id="tab-empresa-filiais" onclick="trocarAbaEmpresa('filiais')">
+                <i class="fa-solid fa-code-branch"></i> FILIAIS
+            </button>
+        </div>
+
+        <!-- CONTAINER PRINCIPAL DO CRONOGRAMA -->
+        <div class="cronograma-main-card">
+            
+            <!-- ABAS DO CRONOGRAMA (AGORA APENAS 2 ABAS, PREENCHENDO O ESPAÇO) -->
+            <div class="tabs-container-secao">
+                <button type="button" class="tab-secao-btn active" id="tab-secao-urgentes" onclick="trocarAbaSecao('urgentes_entrada')">
+                    <i class="fa-solid fa-triangle-exclamation"></i> 1ª ABA: NOTAS URGENTES (ENTRADA)
+                    <span class="badge-count" id="count-urgentes-entrada">0</span>
+                </button>
+                <button type="button" class="tab-secao-btn" id="tab-secao-listas-urgentes" onclick="trocarAbaSecao('listas_urgencia')">
+                    <i class="fa-solid fa-bolt"></i> 2ª ABA: LISTAS DE URGÊNCIA
+                    <span class="badge-count" id="count-listas-urgencia">0</span>
+                </button>
+            </div>
+
+            <!-- LEGENDA DE STATUS DE COR (COM BOTÃO DE MINIMIZAR / SETINHA) -->
+            <div class="status-legend-card" id="statusLegendCard">
+                <div class="status-legend-header" onclick="toggleMinimizarLegenda()">
+                    <span class="legend-title"><i class="fa-solid fa-circle-info"></i> Legenda de Status</span>
+                    <button type="button" class="btn-toggle-legenda" id="btnToggleLegenda" title="Minimizar / Expandir Legenda">
+                        <i class="fa-solid fa-chevron-up" id="iconToggleLegenda"></i>
+                    </button>
+                </div>
+                <div class="status-legend-body" id="statusLegendBody">
+                    <div class="legend-items">
+                        <span class="legend-chip chip-cinza"><i class="fa-solid fa-clock"></i> Aguardando Entrada</span>
+                        <span class="legend-chip chip-laranja"><i class="fa-solid fa-calculator"></i> Nota Não Calculada (Aguardando Validação)</span>
+                        <span class="legend-chip chip-amarelo"><i class="fa-solid fa-check"></i> Nota Calculada (Entrada Concluída)</span>
+                        <span class="legend-chip chip-verde"><i class="fa-solid fa-circle-check"></i> Finalizada no Sistema / Entrada Concluída</span>
+                        <span class="legend-chip chip-desabilitado"><i class="fa-solid fa-ban"></i> Indisponível (Não Localizado)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTAINER DINÂMICO DOS CARDS E TABELAS -->
+            <div id="cronogramaContentArea" class="cronograma-content-body">
+                <!-- Conteúdo renderizado via JS -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- INTEGRAÇÃO FIRESTORE EM TEMPO REAL -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8LgNHTdCFMLTaD3s5J2SFQ4q4AvDEW24",
+            authDomain: "operator-machine-1d822.firebaseapp.com",
+            projectId: "operator-machine-1d822",
+            storageBucket: "operator-machine-1d822.firebasestorage.app",
+            messagingSenderId: "534044217325",
+            appId: "1:534044217325:web:804b3b39f8c5d1a9a0a1e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.docRefApp = doc(db, "central_notas", "dados_gerais");
+
+        onSnapshot(window.docRefApp, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                
+                window.pendingNFs = data.pendingNFs || [];
+                window.tratativasNFs = data.notasGerais || data.tratativasNFs || [];
+                window.finishedNFs = data.finishedNFs || [];
+                
+                window.listasUrgencia = data.listasUrgencia || [];
+
+                if (typeof window.atualizarPainelCronograma === "function") {
+                    window.atualizarPainelCronograma();
+                }
+            }
+        });
+    </script>
+
+    <!-- Script JS Principal -->
+    <script src="cronograma.js"></script>
+</body>
+</html>

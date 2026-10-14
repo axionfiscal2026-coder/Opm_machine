@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Sistema de Login</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CONTAINER DE LOGIN -->
+    <div class="login-container">
+        <div class="login-header">
+            <div class="brand-logo">
+                OPM <span class="brand-v2">V1</span>
+            </div>
+            <p class="brand-subtitle" id="brandSubtitle">Central de Notas</p>
+        </div>
+
+        <!-- SELETOR DE PERFIS -->
+        <div class="profile-selector">
+            <button type="button" class="profile-btn active" id="btnPerfilNotas" onclick="mudarPerfil('notas')">
+                <i class="fa-solid fa-note-sticky"></i> Central de Notas
+            </button>
+            <button type="button" class="profile-btn" id="btnPerfilGestao" onclick="mudarPerfil('gestao')">
+                <i class="fa-solid fa-chart-pie"></i> Gestão
+            </button>
+        </div>
+
+        <form id="loginForm" onsubmit="realizarLogin(event)">
+            <div class="form-group">
+                <label for="username"><i class="fa-solid fa-user"></i> E-mail de Acesso</label>
+                <input type="text" id="username" placeholder="Digite seu e-mail..." required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-lock"></i> Senha</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Digite sua senha..." required>
+                    <button type="button" class="btn-toggle-pass" onclick="toggleMostrarSenha()" title="Mostrar/Ocultar Senha">
+                        <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;">
+                <i class="fa-solid fa-triangle-exclamation"></i> E-mail ou senha incorretos!
+            </div>
+
+            <button type="submit" class="btn-login" id="btnLogin">
+                <i class="fa-solid fa-right-to-bracket"></i> Entrar no Sistema
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <span>Operator Machine &copy; 2026</span>
+        </div>
+    </div>
+
+    <!-- SCRIPT DO FIREBASE E AUTHENTICATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8lgNHTdCfMLTaD3s5J2SFQ4q4AvDEW24",
+            authDomain: "operator-machine-1d822.firebaseapp.com",
+            projectId: "operator-machine-1d822",
+            storageBucket: "operator-machine-1d822.firebasestorage.app",
+            messagingSenderId: "534044217325",
+            appId: "1:534044217325:web:804b3b39f8c5d1a9a0a1e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Disponibiliza o auth globalmente para o script.js
+        window.firebaseAuth = auth;
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html>

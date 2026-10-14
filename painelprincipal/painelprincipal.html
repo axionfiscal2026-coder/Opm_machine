@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Operator Machine - Painel Principal</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="painelprincipal.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">OPERATOR MACHINE</span>
+        </div>
+        
+        <button type="button" class="btn-voltar-topo" onclick="voltarParaGestao()" title="Voltar à Gestão">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Gestão
+        </button>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <header class="page-header">
+            <span class="tag">VISÃO GERAL</span>
+            <h1>Caderno de Anotações</h1>
+            <p class="subtitle">Crie e gerencie seus lembretes e anotações rápidas de trabalho.</p>
+        </header>
+
+        <!-- Layout Principal: Caderno 100% -->
+        <div class="workspace-wrapper">
+            
+            <!-- Caderno de Anotações -->
+            <section class="notebook-container">
+                
+                <!-- Lado Esquerdo: Lista de Lembretes -->
+                <aside class="notes-sidebar">
+                    <div class="sidebar-header">
+                        <span><i data-lucide="file-text"></i> Lembretes</span>
+                        <button id="addNoteBtn" title="Nova Nota"><i data-lucide="plus"></i></button>
+                    </div>
+                    <div class="notes-list" id="notesList">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </aside>
+
+                <!-- Lado Direito do Caderno: Editor -->
+                <div class="notebook-editor">
+                    <div class="toolbar">
+                        <div class="toolbar-left">
+                            <button id="btnBold" class="tool-btn" title="Negrito">
+                                <i data-lucide="bold"></i>
+                            </button>
+                            <button id="btnHighlight" class="tool-btn" title="Grifar">
+                                <i data-lucide="highlighter"></i>
+                            </button>
+
+                            <!-- Seletor de Cor do Texto -->
+                            <div class="color-dropdown-wrapper">
+                                <button id="btnTextColor" class="tool-btn" title="Cor do Texto">
+                                    <i data-lucide="droplet"></i>
+                                    <span class="current-color-indicator" id="colorIndicator"></span>
+                                </button>
+                                <div class="color-popover" id="colorPopover">
+                                    <span class="popover-title">Cor do texto</span>
+                                    <div class="color-options">
+                                        <button class="color-circle active" data-color="default" title="Padrão" style="background: var(--text-main);"></button>
+                                        <button class="color-circle" data-color="#035AA6" title="Azul Escuro" style="background: #035AA6;"></button>
+                                        <button class="color-circle" data-color="#dc2626" title="Vermelho" style="background: #dc2626;"></button>
+                                        <button class="color-circle" data-color="#16a34a" title="Verde" style="background: #16a34a;"></button>
+                                        <button class="color-circle" data-color="#F2C438" title="Amarelo" style="background: #F2C438;"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lupa de Pesquisa no Canto Oposto -->
+                        <div class="notebook-search-wrapper">
+                            <div class="notebook-search-box" id="notebookSearchBox">
+                                <input type="text" id="searchNoteInput" placeholder="Pesquisar nos lembretes...">
+                            </div>
+                            <button id="btnToggleSearch" class="tool-btn" title="Pesquisar no Caderno">
+                                <i data-lucide="search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Área Pautada do Caderno -->
+                    <div class="notebook-paper">
+                        <input type="text" id="noteTitle" class="note-title-input" placeholder="Título da Nota...">
+                        <div id="noteContent" class="note-editable-area" contenteditable="true" placeholder="Digite suas anotações aqui..."></div>
+                    </div>
+                </div>
+
+            </section> 
+
+        </div>
+    </main>
+
+    <!-- JS Principal -->
+    <script src="painelprincipal.js"></script>
+</body>
+</html>

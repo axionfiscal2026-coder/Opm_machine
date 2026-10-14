@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Operator Machine - Gestão de Notas Finalizadas</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Específico -->
+    <link rel="stylesheet" href="nffinalizadas.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">Operator Machine</span>
+        </div>
+        
+        <!-- BADGE DE CONTAGEM REGRESSIVA NO CANTO SUPERIOR DIREITO -->
+        <span class="countdown-badge" id="countdownBadge" title="Tempo restante para o reset automático da lista">
+            <i class="fa-solid fa-clock-rotate-left"></i> Reset em: <strong id="timerText">45d 00h 00m</strong>
+        </span>
+    </header>
+
+    <!-- NOTIFICAÇÃO FLUTUANTE -->
+    <div id="toast-notification" class="toast-notification">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Nota finalizada com sucesso!</span>
+    </div>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="content-area-full">
+        <h2 class="page-main-title">GESTÃO DE NOTAS FINALIZADAS</h2>
+
+        <div id="formAreaWrapper">
+            
+            <!-- NAVEGAÇÃO POR ABAS: ANTENOR DUARTE / FILIAIS -->
+            <div class="tabs-container">
+                <button type="button" class="tab-button active" id="tab-antenor" onclick="trocarAba('antenor')">
+                    <i class="fa-solid fa-building"></i> ANTENOR DUARTE
+                </button>
+                <button type="button" class="tab-button" id="tab-filiais" onclick="trocarAba('filiais')">
+                    <i class="fa-solid fa-code-branch"></i> FILIAIS
+                </button>
+            </div>
+
+            <div class="form-card-container" id="formCardTop">
+                <div class="form-card-header">
+                    <div class="header-icon-title">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <h3 id="formSectionTitle">CONTROLE DE NOTAS - FINALIZADAS (ANTENOR DUARTE)</h3>
+                    </div>
+                    <button type="button" class="btn-voltar-topo" onclick="voltarParaGestao()" title="Voltar">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
+
+                <form id="cdnf-finalizadas-form" onsubmit="handleFormSubmit(event)">
+                    <div class="bloco-nota-item">
+                        <div class="form-grid">
+                            
+                            <!-- SELECT CUSTOMIZADO DE NOTAS PENDENTES DA ABA ATUAL -->
+                            <div class="form-group full-width custom-dropdown-container">
+                                <label>Selecione o Número da NF *</label>
+                                <div class="custom-select-trigger" id="nfSelectTrigger" onclick="toggleNfDropdown()">
+                                    <span id="selectedNfText">-- Selecione uma NF pendente --</span>
+                                    <i class="fa-solid fa-chevron-down" id="nfDropdownIcon"></i>
+                                </div>
+                                <div class="custom-dropdown-menu" id="nfDropdownMenu">
+                                    <div class="dropdown-search-box">
+                                        <i class="fa-solid fa-search"></i>
+                                        <input type="text" id="searchNfInput" placeholder="Buscar Nº NF..." oninput="filtrarDropdownNF(this.value)">
+                                    </div>
+                                    <div id="nfListItems" class="dropdown-scroll-items"></div>
+                                </div>
+                                <input type="hidden" id="selectNumeroNf" required>
+                            </div>
+
+                            <!-- CAMPOS EXIBIDOS APÓS SELECIONAR A NOTA -->
+                            <div id="camposComplementares" style="display: none; grid-column: 1 / -1; width: 100%;">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="inputNumNfManual">Número da NF *</label>
+                                        <input type="text" id="inputNumNfManual" readonly class="input-readonly">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="inputNomeEmpresa">Nome da Empresa *</label>
+                                        <input type="text" id="inputNomeEmpresa" readonly class="input-readonly">
+                                    </div>
+
+                                    <!-- FINALIZADO POR -->
+                                    <div class="form-group">
+                                        <label for="selectUsuarioResp">FINALIZADO POR *</label>
+                                        <div class="select-with-gear">
+                                            <select id="selectUsuarioResp" required>
+                                                <option value="">Selecione um usuário...</option>
+                                            </select>
+                                            <button type="button" class="btn-config-input" onclick="abrirModalGerenciarUsuarios()" title="Gerenciar Usuários">
+                                                <i class="fa-solid fa-gear"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- UNIDADE -->
+                                    <div class="form-group">
+                                        <label>Unidade</label>
+                                        <div id="unidadeReadonlyBox">
+                                            <input type="text" id="inputUnidadeReadonly" readonly class="input-readonly">
+                                        </div>
+                                        <div id="unidadeSelectGroup" class="select-with-gear" style="display: none;">
+                                            <select id="selectUnidadeEdit">
+                                                <option value="">Selecione...</option>
+                                                <option value="ANTENOR DUARTE VILELA">ANTENOR DUARTE VILELA</option>
+                                                <option value="HOSPITAL SÃO JORGE">HOSPITAL SÃO JORGE</option>
+                                                <option value="UNIDADE PAULO PRATA">UNIDADE PAULO PRATA</option>
+                                            </select>
+                                            <button type="button" class="btn-config-input" onclick="promptAdicionarUnidade()" title="Gerenciar Unidades">
+                                                <i class="fa-solid fa-gear"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- SEÇÃO RETRÁTIL -->
+                                    <div class="collapsible-section full-width">
+                                        <div class="collapsible-header" onclick="toggleCamuflados()">
+                                            <span><i class="fa-solid fa-sliders"></i> Informações de Classificação (Tipo, Local Estoque, Operação)</span>
+                                            <i class="fa-solid fa-chevron-down" id="toggleChevronIcon"></i>
+                                        </div>
+                                        
+                                        <div class="collapsible-content" id="collapsibleDetails" style="display: none;">
+                                            <div class="form-grid" style="margin-top: 14px;">
+                                                
+                                                <!-- TIPO -->
+                                                <div class="form-group custom-dropdown-container">
+                                                    <label>Tipo:</label>
+                                                    <div id="tipoReadonlyBox">
+                                                        <input type="text" id="inputTipoReadonly" readonly class="input-readonly">
+                                                    </div>
+                                                    <div id="tipoSelectGroup" style="display: none;">
+                                                        <div class="custom-select-trigger" id="tipoSelectTrigger" onclick="toggleTipoDropdown()">
+                                                            <span id="selectedTipoText">Nenhuma</span>
+                                                            <i class="fa-solid fa-chevron-down"></i>
+                                                        </div>
+                                                        <div class="custom-dropdown-menu custom-dropdown-searchable" id="tipoDropdownMenu">
+                                                            <div class="dropdown-search-inner">
+                                                                <input type="text" id="searchTipoInput" placeholder="Pesquisar..." oninput="filtrarOpcoesTipo(this.value)">
+                                                            </div>
+                                                            <div id="tipoListItems" class="dropdown-scroll-items"></div>
+                                                            <div class="dropdown-add-dashed-btn" onclick="promptAdicionarNovoTipo()">
+                                                                + Adicionar tipo
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" id="inputTipoVal" value="Nenhuma">
+                                                </div>
+
+                                                <!-- LOCAL ESTOQUE -->
+                                                <div class="form-group custom-dropdown-container">
+                                                    <label>Local Estoque:</label>
+                                                    <div id="estoqueReadonlyBox">
+                                                        <input type="text" id="inputEstoqueReadonly" readonly class="input-readonly">
+                                                    </div>
+                                                    <div id="estoqueSelectGroup" style="display: none;">
+                                                        <div class="custom-select-trigger" id="estoqueSelectTrigger" onclick="toggleEstoqueDropdown()">
+                                                            <span id="selectedEstoqueText">Nenhuma</span>
+                                                            <i class="fa-solid fa-chevron-down"></i>
+                                                        </div>
+                                                        <div class="custom-dropdown-menu custom-dropdown-searchable" id="estoqueDropdownMenu">
+                                                            <div class="dropdown-search-inner">
+                                                                <input type="text" id="searchEstoqueInput" placeholder="Pesquisar..." oninput="filtrarOpcoesEstoque(this.value)">
+                                                            </div>
+                                                            <div id="estoqueListItems" class="dropdown-scroll-items"></div>
+                                                            <div class="dropdown-add-dashed-btn" onclick="promptAdicionarNovoEstoque()">
+                                                                + Adicionar local
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" id="inputEstoqueVal" value="Nenhuma">
+                                                </div>
+
+                                                <!-- OPERAÇÃO -->
+                                                <div class="form-group full-width">
+                                                    <label>Operação:</label>
+                                                    <div id="operacaoReadonlyBox">
+                                                        <input type="text" id="inputOperacaoReadonly" readonly class="input-readonly">
+                                                    </div>
+                                                    <div id="operacaoSelectGroup" style="display: none;">
+                                                        <select id="selectOperacaoEdit">
+                                                            <option value="Nenhuma">Nenhuma</option>
+                                                            <option value="RECURSO PRÓPRIO">RECURSO PRÓPRIO</option>
+                                                            <option value="VERBA C/ RESTRIÇÃO">VERBA C/ RESTRIÇÃO</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-footer-actions">
+                        <button type="button" class="btn-cancelar-selecao" id="btnCancelarSelecao" style="display: none;" onclick="resetarFormulario()">
+                            <i class="fa-solid fa-xmark"></i> Cancelar Seleção
+                        </button>
+                        <div></div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn-ver-notas-toggle" onclick="alternarTela('tabela')" title="Ver Notas Cadastradas">
+                                <i class="fa-solid fa-table-list"></i> Ver Notas
+                            </button>
+                            <button type="submit" class="btn-save" id="btn-submit-action">
+                                <i class="fa-solid fa-check-double"></i> Finalizar Nota
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TABELA DE NOTAS FINALIZADAS SALVAS -->
+        <div class="form-card-container history-container-box" id="historySection" style="display: none;">
+            
+            <div class="tabs-container">
+                <button type="button" class="tab-button active" id="tab-antenor-hist" onclick="trocarAba('antenor')">
+                    <i class="fa-solid fa-building"></i> ANTENOR DUARTE
+                </button>
+                <button type="button" class="tab-button" id="tab-filiais-hist" onclick="trocarAba('filiais')">
+                    <i class="fa-solid fa-code-branch"></i> FILIAIS
+                </button>
+            </div>
+
+            <div class="table-toolbar">
+                <div class="toolbar-title-group">
+                    <h3 id="tabelaAbaTitulo">Notas Cadastradas — ANTENOR DUARTE</h3>
+                </div>
+                <div class="toolbar-actions-group">
+                    <button type="button" class="btn-voltar-topo" onclick="alternarTela('formulario')" title="Voltar ao Formulário">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar ao Formulário
+                    </button>
+                    <button type="button" class="tool-action-btn" onclick="abrirModalRelatorio()" title="Gerar Relatório">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                    </button>
+                    <div class="search-box-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar..." oninput="filtrarNotasTabela()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive-wrapper">
+                <table class="custom-data-table">
+                    <thead>
+                        <tr>
+                            <th>Nº NF</th>
+                            <th>Empresa</th>
+                            <th>Unidade</th>
+                            <th>Finalizado por</th>
+                            <th>Detalhes</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaFinalizadasBody"></tbody>
+                </table>
+            </div>
+
+            <div class="table-pagination-footer">
+                <span id="paginationInfo">Mostrando 0–0 de 0 registros</span>
+                <div class="pagination-controls">
+                    <button type="button" id="prevPageBtn" onclick="mudarPagina(-1)" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="pageIndicator">1/1</span>
+                    <button type="button" id="nextPageBtn" onclick="mudarPagina(1)" disabled><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAIS -->
+    <div id="modalGerenciarUsuarios" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-users-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users-gear" style="color: var(--primary-dark);"></i> Gerenciar Usuários Responsáveis</h3>
+                <button class="modal-close" onclick="fecharModalGerenciarUsuarios()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <label class="modal-sub-label">Adicionar Novo Usuário</label>
+                <div class="add-user-input-group">
+                    <input type="text" id="inputNovoUsuarioModal" placeholder="Ex: Maria Souza">
+                    <button type="button" class="btn-add-user-modal" onclick="adicionarNovoUsuarioModal()">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                </div>
+
+                <label class="modal-sub-label" style="margin-top: 16px;">Usuários Cadastrados:</label>
+                <div class="users-list-box" id="modalUsersListBox"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalDetalhes" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-info"></i> Detalhes da Nota Finalizada</h3>
+                <button class="modal-close" onclick="fecharModalDetalhes()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesContent"></div>
+        </div>
+    </div>
+
+    <div id="modalEstorno" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-estorno-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-rotate-left" style="color: #D97706;"></i> Estornar Nota para Entrada</h3>
+                <button class="modal-close" onclick="fecharModalEstorno()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="estorno-description">
+                    Ao estornar, esta nota sairá do controle de finalizadas e voltará para o controle de <strong>Entrada NF</strong>.
+                </p>
+                <div class="form-group" style="margin-top: 14px;">
+                    <label for="inputMotivoEstorno">Motivo do Estorno *</label>
+                    <textarea id="inputMotivoEstorno" rows="3" placeholder="Descreva o motivo obrigatório do estorno..."></textarea>
+                </div>
+                <div class="modal-estorno-actions">
+                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalEstorno()">Cancelar</button>
+                    <button type="button" class="btn-confirmar-estorno" onclick="confirmarEstornoModal()">
+                        <i class="fa-solid fa-rotate-left"></i> Confirmar Estorno
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalRelatorio" class="modal-overlay" style="display: none;">
+        <div class="modal-card report-modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-lines"></i> Relatório de Notas Finalizadas (<span id="reportNomeAba">ANTENOR DUARTE</span>)</h3>
+                <button class="modal-close" onclick="fecharModalRelatorio()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body report-modal-body">
+                <div class="report-toolbar">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="checkAllReport" checked onclick="toggleMarcarTodas(this)"> Marcar / Desmarcar Todas
+                    </label>
+                    <button type="button" class="btn-visualizar-pdf" onclick="gerarVisualizacaoPDF()">
+                        <i class="fa-solid fa-eye"></i> Visualizar
+                    </button>
+                </div>
+                <div class="report-preview-container">
+                    <div class="report-doc-header">
+                        <h2>CENTRAL DE NOTAS - RELATÓRIO DE FINALIZADAS</h2>
+                        <span id="reportTimestamp">Gerado em: --/--/---- às --:--</span>
+                    </div>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">Incluir</th>
+                                <th>Nº NF</th>
+                                <th>Empresa</th>
+                                <th>Unidade</th>
+                                <th>Finalizado Por</th>
+                                <th>Tipo</th>
+                                <th>Local Estoque</th>
+                                <th>Operação</th>
+                                <th>Finalizado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE ATUALIZADO (PROJETO OPERATOR-MACHINE-1D822)[cite: 5] -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8lgNHTdCfMLTaD3s5J2SFQ4q4AvDEW24",
+            authDomain: "operator-machine-1d822.firebaseapp.com",
+            projectId: "operator-machine-1d822",
+            storageBucket: "operator-machine-1d822.firebasestorage.app",
+            messagingSenderId: "534044217325",
+            appId: "1:534044217325:web:804b3b39f8c5d1a9a0a1e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.docRefApp = doc(db, "central_notas", "dados_gerais");
+
+        window.syncWithFirebase = async function() {
+            try {
+                await setDoc(window.docRefApp, {
+                    pendingNFs: window.pendingNFs || [],
+                    gestaoFinalizadasNFs: window.gestaoFinalizadasNFs || JSON.parse(localStorage.getItem('opm_notas_finalizadas_local')) || [],
+                    finishedNFs: window.finishedNFs || [],
+                    userList: window.userList || ['BRUNO', 'GAB', 'CARLOS', 'JOAO'],
+                    unidadesList: window.unidadesList || [],
+                    tiposList: window.tiposList || ['DEVOLUÇÃO', 'Nota de Serviço', 'Patrimonio', 'OPME'],
+                    estoquesList: window.estoquesList || ['ALMOXARIFADO CENTRAL', 'FARMÁCIA ALMOXARIFADO', 'FARMÁCIA QT ESTOQUE'],
+                    reset61DaysTs: window.reset61DaysTs || Date.now() + (45 * 24 * 60 * 60 * 1000),
+                    lastUpdated: Date.now()
+                }, { merge: true });
+            } catch (error) {
+                console.error("Erro ao salvar no Firebase:", error);
+            }
+        };
+
+        onSnapshot(window.docRefApp, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                window.pendingNFs = data.pendingNFs || [];
+                
+                const finalizadasGerais = data.gestaoFinalizadasNFs || data.nfFinalizadas || [];
+                window.gestaoFinalizadasNFs = finalizadasGerais;
+                notasFinalizadasLocais = finalizadasGerais;
+                localStorage.setItem('opm_notas_finalizadas_local', JSON.stringify(finalizadasGerais));
+
+                if (data.userList) window.userList = data.userList;
+                if (data.unidadesList) window.unidadesList = data.unidadesList;
+                if (data.tiposList) window.tiposList = data.tiposList;
+                if (data.estoquesList) window.estoquesList = data.estoquesList;
+                
+                const baseTs = data.reset61DaysTs;
+                const limite45diasMs = 45 * 24 * 60 * 60 * 1000;
+                if (!baseTs || baseTs <= Date.now() || (baseTs - Date.now() > (61 * 24 * 60 * 60 * 1000))) {
+                    window.reset61DaysTs = Date.now() + limite45diasMs;
+                } else {
+                    window.reset61DaysTs = baseTs;
+                }
+
+                if (typeof window.carregarOpcoesNfPendentes === "function") window.carregarOpcoesNfPendentes();
+                if (typeof window.renderUserSelectOptions === "function") window.renderUserSelectOptions();
+                if (typeof window.renderTipoListItems === "function") window.renderTipoListItems();
+                if (typeof window.renderEstoqueListItems === "function") window.renderEstoqueListItems();
+                if (typeof window.renderizarTabelaPaginada === "function") window.renderizarTabelaPaginada();
+            }
+        });
+    </script>
+
+    <script src="nffinalizadas.js"></script>
+</body>
+</html>

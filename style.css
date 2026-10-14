@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root { 
+    --primary-dark: #035AA6; 
+    --primary-med: #049DD9; 
+    --primary-light: #04B2D9; 
+    --bg-light: #F2F2F2; 
+    --card-bg: #FFFFFF; 
+    --text-title: #035AA6; 
+    --text-main: #2D3748; 
+    --text-muted: #718096; 
+    --card-border: #D1D5DB; 
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+html, body { height: 100vh; overflow: hidden; }
+
+body { 
+    background: linear-gradient(135deg, #035AA6 0%, #049DD9 100%); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px;
+}
+
+.login-container { 
+    background-color: var(--card-bg); 
+    width: 100%; 
+    max-width: 420px; 
+    padding: 32px; 
+    border-radius: 20px; 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px;
+}
+
+.login-header { text-align: center; }
+
+.brand-logo { 
+    font-family: 'Montserrat', sans-serif; 
+    font-size: 2.2rem; 
+    font-weight: 900; 
+    color: var(--primary-dark); 
+    letter-spacing: 1px;
+}
+
+.brand-v2 { 
+    background-color: #FEF3C7; 
+    color: #D97706; 
+    font-size: 0.9rem; 
+    padding: 2px 8px; 
+    border-radius: 8px; 
+    vertical-align: middle;
+}
+
+.brand-subtitle { 
+    font-size: 0.88rem; 
+    font-weight: 700; 
+    color: var(--primary-med); 
+    margin-top: 4px; 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* SELETOR DE PERFIS */
+.profile-selector {
+    display: flex;
+    background-color: #F3F4F6;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+}
+
+.profile-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.profile-btn.active {
+    background-color: var(--card-bg);
+    color: var(--primary-dark);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+form { display: flex; flex-direction: column; gap: 14px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.form-group label { 
+    font-size: 0.82rem; 
+    font-weight: 700; 
+    color: var(--primary-dark); 
+    display: flex; 
+    align-items: center; 
+    gap: 6px;
+}
+
+.form-group input { 
+    width: 100%; 
+    padding: 12px 14px; 
+    border: 1px solid var(--card-border); 
+    background-color: #FAFAFA; 
+    border-radius: 10px; 
+    font-size: 0.9rem; 
+    outline: none; 
+    transition: all 0.2s;
+}
+
+.form-group input:focus { 
+    border-color: var(--primary-med); 
+    background-color: #FFF; 
+    box-shadow: 0 0 0 3px rgba(4, 157, 217, 0.15);
+}
+
+.password-wrapper { position: relative; width: 100%; }
+
+.btn-toggle-pass { 
+    position: absolute; 
+    right: 12px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    background: none; 
+    border: none; 
+    color: var(--text-muted); 
+    cursor: pointer; 
+    font-size: 0.95rem;
+}
+
+.btn-toggle-pass:hover { color: var(--primary-dark); }
+
+.error-message { 
+    background-color: #FEE2E2; 
+    border: 1px solid #FCA5A5; 
+    color: #DC2626; 
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    font-size: 0.82rem; 
+    font-weight: 700; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+}
+
+.btn-login { 
+    background-color: var(--primary-dark); 
+    color: #FFF; 
+    border: none; 
+    padding: 14px; 
+    border-radius: 10px; 
+    font-weight: 800; 
+    font-size: 0.95rem; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px; 
+    margin-top: 4px; 
+    transition: background-color 0.2s;
+}
+
+.btn-login:hover { background-color: var(--primary-med); }
+
+.login-footer { 
+    text-align: center; 
+    font-size: 0.78rem; 
+    color: var(--text-muted); 
+    font-weight: 600; 
+    border-top: 1px solid #E5E7EB; 
+    padding-top: 12px;
+}

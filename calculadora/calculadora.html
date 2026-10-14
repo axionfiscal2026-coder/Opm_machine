@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Calculadora e Ferramentas Auxiliares</title>
+    
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="calculadora.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">OPERATOR MACHINE</span>
+        </div>
+        <button type="button" class="btn-voltar-topo" onclick="voltarParaGestao()" title="Voltar à Gestão">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Gestão
+        </button>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL CENTRALIZADO -->
+    <main class="main-content">
+        <header class="page-header">
+            <div class="header-top-row">
+                <div>
+                    <span class="tag" id="toolTag">FERRAMENTAS AUXILIARES</span>
+                    <h1 id="pageTitle">Cálculo Proporcional de Notas</h1>
+                    <p id="pageSubtitle">Calcule o valor total correspondente a uma quantidade de itens na nota.</p>
+                </div>
+                <!-- Botão de Alternância de Ferramentas -->
+                <button id="btnAlternarCalc" class="btn-switch-calc" title="Alternar tipo de ferramenta">
+                    <i class="fa-solid fa-right-left"></i>
+                    <span id="switchBtnText">Cálculo Validade</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 1. CONTAINER DA REGRA DE 3 -->
+        <section id="calcRegra3" class="calculator-card">
+            <div class="calc-grid-header">
+                <div class="col-title"><i class="fa-solid fa-boxes-stacked"></i> Quantidade (Un)</div>
+                <div></div>
+                <div class="col-title"><i class="fa-solid fa-brazilian-real-sign"></i> Valor Total (R$)</div>
+            </div>
+
+            <div class="rule-grid">
+                <div class="input-group">
+                    <label for="qtdTotal">Quantidade Total</label>
+                    <input type="number" id="qtdTotal" placeholder="Ex: 100" step="any">
+                </div>
+                
+                <div class="arrow-indicator">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+
+                <div class="input-group">
+                    <label for="valTotal">Custa o total de (R$)</label>
+                    <input type="text" id="valTotal" placeholder="R$ 0,00">
+                </div>
+
+                <div class="input-group">
+                    <label for="qtdParcial">Quero saber o valor de</label>
+                    <input type="number" id="qtdParcial" placeholder="Ex: 40" step="any">
+                </div>
+
+                <div class="arrow-indicator">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+
+                <div class="input-group result-highlight">
+                    <label for="valParcial">Valor Proporcional (R$)</label>
+                    <input type="text" id="valParcial" placeholder="R$ 0,00" readonly>
+                </div>
+            </div>
+
+            <div class="calc-actions">
+                <button type="button" id="btnCalcular" class="btn btn-primary">
+                    <i class="fa-solid fa-calculator"></i> Calcular
+                </button>
+                <button type="button" id="btnLimpar" class="btn btn-secondary">
+                    <i class="fa-solid fa-rotate-left"></i> Limpar
+                </button>
+            </div>
+
+            <div id="formulaExplanation" class="formula-box">
+                Preencha os três campos acima para calcular o valor proporcional.
+            </div>
+        </section>
+
+        <!-- 2. CONTAINER DE CÁLCULO DE VALIDADE -->
+        <section id="calcValidade" class="calculator-card" style="display: none;">
+            <div class="validity-grid">
+                <div class="input-group">
+                    <label for="selectEstoque"><i class="fa-solid fa-warehouse"></i> Selecione o Estoque / Setor</label>
+                    <select id="selectEstoque" class="custom-select">
+                        <option value="farmacia_almox">Farmácia Almoxarifado</option>
+                        <option value="almox_central">Almoxarifado Central</option>
+                        <option value="farmacia_qt">Farmácia Qt Estoque</option>
+                        <option value="almox_lab">Almoxarifado Central - Laboratório (Min. 3 Meses)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="inputDataValidade"><i class="fa-solid fa-calendar-days"></i> Data de Validade do Produto</label>
+                    <input type="date" id="inputDataValidade" class="custom-input-date">
+                </div>
+            </div>
+
+            <!-- Caixa de Status da Validade -->
+            <div id="validityStatusBox" class="validity-result-box empty">
+                <div class="status-badge" id="validityBadge">Aguardando Data</div> 
+                <h2 id="validityMainTitle">Selecione uma data para verificar a conformidade</h2>
+                <p id="validitySubText">O cálculo verificará os dias restantes a partir de hoje em relação ao tempo mínimo exigido pelo setor.</p>
+            </div>
+
+            <!-- Detalhes do Cálculo -->
+            <div id="validityDetailsBox" class="info-quote-box" style="display: none;">
+                <h3><i class="fa-solid fa-circle-info"></i> Detalhamento do Prazo</h3>
+                <div class="validity-details-grid">
+                    <div>
+                        <span>Data Atual:</span>
+                        <strong id="valDetailToday">--/--/----</strong>
+                    </div>
+                    <div>
+                        <span>Tempo Restante Total:</span>
+                        <strong id="valDetailRemaining">0 dias</strong>
+                    </div>
+                    <div>
+                        <span>Mínimo Exigido do Setor:</span>
+                        <strong id="valDetailMinRequired">12 meses (365 dias)</strong>
+                    </div>
+                    <div id="valDivergentContainer" class="divergent-highlight">
+                        <span>Tempo Divergente / Faltante:</span>
+                        <strong id="valDetailDivergent">Nenhuma divergência</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="calculadora.js"></script>
+</body>
+</html>

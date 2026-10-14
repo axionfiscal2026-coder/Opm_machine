@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Operator Machine - Gestão de Tratativas</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Específico -->
+    <link rel="stylesheet" href="tratativas.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">Operator Machine</span>
+        </div>
+        <div class="top-bar-actions">
+            <div class="reset-timer-badge" id="resetTimerBadge" title="Tempo restante para a limpeza automática das pendências resolvidas">
+                <i class="fa-solid fa-rotate-left"></i> Reset em: <span id="resetTimerText">45d 00h 00m</span>
+            </div>
+            <button type="button" class="btn-voltar-gestao" onclick="voltarParaGestao()" title="Voltar para Gestão de Notas">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </button>
+        </div>
+    </header>
+
+    <!-- NOTIFICAÇÃO FLUTUANTE TOAST -->
+    <div id="toast-notification" class="toast-notification">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="content-area-full">
+        
+        <h2 class="page-main-title">REGISTRO DE TRATATIVAS DA NF</h2>
+
+        <!-- TELA 1: FORMULÁRIO DE TRATATIVAS -->
+        <div id="formAreaWrapper">
+
+            <div class="tabs-container">
+                <button type="button" class="tab-button active" id="tab-antenor" onclick="trocarAbaEmpresa('antenor')">
+                    <i class="fa-solid fa-building"></i> ANTENOR DUARTE
+                </button>
+                <button type="button" class="tab-button" id="tab-filiais" onclick="trocarAbaEmpresa('filiais')">
+                    <i class="fa-solid fa-code-branch"></i> FILIAIS
+                </button>
+            </div>
+
+            <div class="form-card-container" id="formCardTop">
+                <div class="form-card-header">
+                    <div class="header-icon-title">
+                        <i class="fa-solid fa-file-signature"></i>
+                        <h3 id="formTitle">Nova Tratativa — ANTENOR DUARTE</h3>
+                    </div>
+                </div>
+
+                <form id="tratativa-form" onsubmit="solicitarStatusCalculada(event)">
+                    <div class="form-grid">
+                        
+                        <div class="form-group full-width">
+                            <div class="modo-nota-toggle-bar">
+                                <button type="button" class="modo-toggle-btn active" id="btnModoSelecionar" onclick="alternarModoNota('selecionar')">
+                                    <i class="fa-solid fa-list-check"></i> Selecionar Número da NF
+                                </button>
+                                <button type="button" class="modo-toggle-btn" id="btnModoAdicionar" onclick="alternarModoNota('adicionar')">
+                                    <i class="fa-solid fa-plus-circle"></i> Adicionar Nota (Manual)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- MODO 1: SELECIONAR NOTA -->
+                        <div class="form-group full-width" id="blocoSelecionarNota">
+                            <label><i class="fa-solid fa-file-invoice"></i> Selecione o Número da NF *</label>
+                            
+                            <div class="custom-dropdown-container" id="customDropdownNf">
+                                <div class="dropdown-selected-box" onclick="toggleDropdownNf()">
+                                    <span id="dropdownSelectedText">-- Selecione uma NF pendente --</span>
+                                    <i class="fa-solid fa-chevron-up" id="dropdownArrowIcon"></i>
+                                </div>
+
+                                <div class="dropdown-popup-panel" id="dropdownPopupPanel" style="display: none;">
+                                    <div class="dropdown-search-wrapper">
+                                        <i class="fa-solid fa-search"></i>
+                                        <input type="text" id="inputBuscaNotaDropdown" placeholder="Buscar Nº NF ou Empresa..." oninput="filtrarListaDropdownNotas(this.value)" onclick="event.stopPropagation()">
+                                    </div>
+                                    <div class="dropdown-options-list" id="dropdownOptionsList"></div>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" id="selectNfHidden" value="">
+                        </div>
+
+                        <!-- MODO 2: ADICIONAR NOTA MANUAL -->
+                        <div class="form-group full-width" id="blocoAdicionarNota" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group">
+                                    <label for="manualNumNf"><i class="fa-solid fa-file-invoice"></i> Número da NF *</label>
+                                    <input type="text" id="manualNumNf" placeholder="Ex: 43754">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualFornecedor"><i class="fa-solid fa-building"></i> Nome do Fornecedor / Empresa *</label>
+                                    <input type="text" id="manualFornecedor" placeholder="Ex: Fornecedor ABC">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CAMPOS AUTOMÁTICOS DA NF -->
+                        <div class="auto-fields-banner full-width" id="autoFieldsContainer" style="display: none;">
+                            <div class="auto-field-item">
+                                <span class="label">Nº NF</span>
+                                <span class="value" id="autoNumNf">-</span>
+                            </div>
+                            <div class="auto-field-item">
+                                <span class="label">Empresa</span>
+                                <span class="value" id="autoEmpresa">-</span>
+                            </div>
+                            <div class="auto-field-item">
+                                <span class="label">Unidade</span>
+                                <span class="value" id="autoUnidade">-</span>
+                            </div>
+                        </div>
+
+                        <!-- USUÁRIO RESPONSÁVEL -->
+                        <div class="form-group">
+                            <label for="usuarioResponsavel"><i class="fa-solid fa-user"></i> Usuário Responsável *</label>
+                            <div class="input-with-btn">
+                                <select id="usuarioResponsavel" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <button type="button" class="btn-config-icon" onclick="abrirModalGerenciarUsuarios()" title="Gerenciar Cadastros de Usuários">
+                                    <i class="fa-solid fa-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- VENCIMENTO BOLETO -->
+                        <div class="form-group">
+                            <label for="vencimentoBoleto"><i class="fa-solid fa-calendar-days"></i> Vencimento do Boleto</label>
+                            <input type="date" id="vencimentoBoleto">
+                        </div>
+
+                        <!-- MOTIVO PENDÊNCIA -->
+                        <div class="form-group">
+                            <label for="motivoPendencia"><i class="fa-solid fa-triangle-exclamation"></i> Motivo da Pendência *</label>
+                            <div class="input-with-btn">
+                                <select id="motivoPendencia" required></select>
+                                <button type="button" class="btn-config-icon" onclick="abrirModalGerenciarMotivos()" title="Gerenciar Motivos de Pendência">
+                                    <i class="fa-solid fa-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- OBSERVAÇÃO -->
+                        <div class="form-group full-width">
+                            <label for="observacao"><i class="fa-solid fa-comment-dots"></i> Observação</label>
+                            <textarea id="observacao" rows="3" placeholder="Escreva observações adicionais sobre esta nota..."></textarea>
+                        </div>
+
+                    </div>
+
+                    <div class="form-footer-actions">
+                        <button type="button" class="btn-ver-notas-toggle" onclick="alternarTela('tabela')">
+                            <i class="fa-solid fa-table-list"></i> Ver Tratativas
+                        </button>
+                        <button type="submit" class="btn-save">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Tratativa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TELA 2: HISTÓRICO DE TRATATIVAS -->
+        <div class="form-card-container history-container-box" id="historySection" style="display: none;">
+            <div class="tabs-container">
+                <button type="button" class="tab-button active" id="tab-antenor-hist" onclick="trocarAbaEmpresa('antenor')">
+                    <i class="fa-solid fa-building"></i> ANTENOR DUARTE
+                </button>
+                <button type="button" class="tab-button" id="tab-filiais-hist" onclick="trocarAbaEmpresa('filiais')">
+                    <i class="fa-solid fa-code-branch"></i> FILIAIS
+                </button>
+            </div>
+
+            <div class="subtabs-segmented-wrapper">
+                <button type="button" class="subtab-chip active" id="subtab-calculada" onclick="trocarSubAba('calculada')">
+                    <i class="fa-solid fa-calculator"></i> NOTA CALCULADA
+                </button>
+                <button type="button" class="subtab-chip" id="subtab-nao-calculada" onclick="trocarSubAba('nao_calculada')">
+                    <i class="fa-solid fa-xmark"></i> NÃO CALCULADA
+                </button>
+            </div>
+
+            <div class="table-toolbar">
+                <div class="toolbar-title-group">
+                    <h3 id="tabelaAbaTitulo"><i class="fa-solid fa-clock-rotate-left"></i> Tratativas Registradas — ANTENOR DUARTE</h3>
+                </div>
+                
+                <div class="filters-group">
+                    <button type="button" class="btn-voltar-topo" onclick="alternarTela('formulario')" title="Voltar ao Formulário">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar
+                    </button>
+
+                    <button type="button" id="btnRelatorioAba" class="tool-action-btn" onclick="abrirModalRelatorioOpcoes()" title="Gerar Relatório de Tratativas">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                    </button>
+
+                    <div class="filter-item">
+                        <select id="filterMotivo" onchange="filtrarTratativasTabela()">
+                            <option value="">Todos os Motivos</option>
+                        </select>
+                    </div>
+
+                    <div class="search-box-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar tratativa..." oninput="filtrarTratativasTabela()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive-wrapper">
+                <table class="custom-data-table">
+                    <thead>
+                        <tr>
+                            <th>Nº NF</th>
+                            <th>Empresa</th>
+                            <th>Vencimento</th>
+                            <th>Motivo</th>
+                            <th>Detalhes</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaTratativasBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container" id="paginationWrapper">
+                <div class="pagination-controls">
+                    <button type="button" class="btn-pag-nav" id="btnPagPrev" onclick="mudarPagina(-1)" title="Página Anterior">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div id="pagNumbers" class="pag-numbers-wrapper"></div>
+                    <button type="button" class="btn-pag-nav" id="btnPagNext" onclick="mudarPagina(1)" title="Próxima Página">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAIS -->
+    <div id="modalPerguntarCalculada" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-question" style="color: var(--primary-dark);"></i> Status do Cálculo</h3>
+                <button class="modal-close" onclick="fecharModalPerguntarCalculada()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 20px;">Esta nota fiscal já foi calculada?</p>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-cancelar" onclick="confirmarSalvarTratativa(false)">Não</button>
+                    <button type="button" class="btn-save" style="background-color: #10B981;" onclick="confirmarSalvarTratativa(true)">
+                        <i class="fa-solid fa-check"></i> Sim
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEditarTratativa" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen" style="color: var(--primary-dark);"></i> Editar Tratativa</h3>
+                <button class="modal-close" onclick="fecharModalEditarTratativa()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTratativaId">
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    <div class="form-group">
+                        <label for="editVencimento"><i class="fa-solid fa-calendar-days"></i> Vencimento</label>
+                        <input type="date" id="editVencimento">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMotivo"><i class="fa-solid fa-triangle-exclamation"></i> Motivo</label>
+                        <select id="editMotivo"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsuario"><i class="fa-solid fa-user"></i> Usuário Responsável</label>
+                        <select id="editUsuario"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUnidade"><i class="fa-solid fa-building"></i> Unidade</label>
+                        <input type="text" id="editUnidade" placeholder="Nome da Unidade">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editObservacao"><i class="fa-solid fa-comment-dots"></i> Observação</label>
+                        <textarea id="editObservacao" rows="3"></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalEditarTratativa()">Cancelar</button>
+                    <button type="button" class="btn-save" onclick="salvarModalEdicaoTratativa()">
+                        <i class="fa-solid fa-check"></i> Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalMigrarCalculada" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calculator" style="color: #D97706;"></i> Atualizar Status do Cálculo</h3>
+                <button class="modal-close" onclick="fecharModalMigrarCalculada()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="textoMigrarCalculada" style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 20px;"></p>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalMigrarCalculada()">Não</button>
+                    <button type="button" class="btn-save" style="background-color: #D97706;" onclick="confirmarMigracaoCalculada()">
+                        <i class="fa-solid fa-check"></i> Sim, Migrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalDetalhesTratativa" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-info"></i> Resumo Geral da Tratativa</h3>
+                <button class="modal-close" onclick="fecharModalDetalhes()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesContent"></div>
+        </div>
+    </div>
+
+    <div id="modalFinalizar" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-check" style="color: #10B981;"></i> Finalizar Tratativa</h3>
+                <button class="modal-close" onclick="fecharModalFinalizar()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="textoConfirmacaoFinalizar" style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 20px;"></p>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalFinalizar()">Não</button>
+                    <button type="button" class="btn-save" style="background-color: #10B981;" onclick="confirmarResolucaoPendencia()">
+                        <i class="fa-solid fa-check"></i> Sim, Finalizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalRelatorioOpcoes" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-lines"></i> Opções de Relatório</h3>
+                <button class="modal-close" onclick="fecharModalRelatorioOpcoes()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+                <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">Escolha o tipo de relatório que deseja gerar:</p>
+                <button type="button" class="btn-report-option" onclick="gerarRelatorioEspecifico(false)">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Apenas Pendências Não Resolvidas
+                </button>
+                <button type="button" class="btn-report-option green-option" onclick="gerarRelatorioEspecifico(true)">
+                    <i class="fa-solid fa-circle-check"></i> Apenas Pendências Resolvidas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalRelatorio" class="modal-overlay" style="display: none;">
+        <div class="modal-card report-modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-lines"></i> Relatório de Tratativas (<span id="reportNomeAba">ANTENOR DUARTE</span>)</h3>
+                <button class="modal-close" onclick="fecharModalRelatorio()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body report-modal-body">
+                <div class="report-toolbar">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="checkAllReport" checked onclick="toggleMarcarTodasRelatorio(this)"> Marcar / Desmarcar Todas
+                    </label>
+                    <button type="button" class="btn-visualizar-pdf" onclick="gerarVisualizacaoPDFTratativas()">
+                        <i class="fa-solid fa-eye"></i> Visualizar PDF
+                    </button>
+                </div>
+                <div class="report-preview-container">
+                    <div class="report-doc-header">
+                        <h2>CENTRAL DE NOTAS - RELATÓRIO DE TRATATIVAS</h2>
+                        <span id="reportTimestamp">Gerado em: --/--/---- às --:--</span>
+                    </div>
+                    <table class="report-table">
+                        <thead id="reportTableHead"></thead>
+                        <tbody id="reportTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalGerenciarUsuarios" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users-gear" style="color: var(--primary-dark);"></i> Gerenciar Usuários Responsáveis</h3>
+                <button class="modal-close" onclick="fecharModalGerenciarUsuarios()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Adicionar Novo Usuário</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="novoUsuarioInput" placeholder="Ex: Maria Souza">
+                        <button type="button" class="btn-save" style="padding: 8px 14px;" onclick="adicionarNovoUsuario()">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+                <label style="font-size: 0.82rem; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 8px;">Usuários Cadastrados:</label>
+                <ul id="listaUsuariosCadastrados" class="lista-unidades-box"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalGerenciarMotivos" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-list-check" style="color: var(--primary-dark);"></i> Gerenciar Motivos de Pendência</h3>
+                <button class="modal-close" onclick="fecharModalGerenciarMotivos()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Adicionar Novo Motivo</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="novoMotivoInput" placeholder="Ex: DIVERGÊNCIA DE PREÇO">
+                        <button type="button" class="btn-save" style="padding: 8px 14px;" onclick="adicionarNovoMotivo()">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+                <label style="font-size: 0.82rem; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 8px;">Motivos Cadastrados:</label>
+                <ul id="listaMotivosCadastrados" class="lista-unidades-box"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEstorno" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-rotate-left" style="color: #D97706;"></i> Estornar Tratativa para Entrada</h3>
+                <button class="modal-close" onclick="fecharModalEstorno()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 12px;">
+                    Ao estornar, esta nota sairá das tratativas e voltará para o controle de <strong>Entrada NF</strong>.
+                </p>
+                <div class="form-group">
+                    <label for="motivoEstornoTexto">Motivo do Estorno *</label>
+                    <textarea id="motivoEstornoTexto" rows="3" placeholder="Descreva o motivo obrigatório do estorno..." required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalEstorno()">Cancelar</button>
+                    <button type="button" class="btn-save" style="background-color: #D97706;" onclick="confirmarEstornoNota()">
+                        <i class="fa-solid fa-rotate-left"></i> Confirmar Estorno
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTEGRAÇÃO FIREBASE CONSOLIDADA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8lgNHTdCfMLTaD3s5J2SFQ4q4AvDEW24",
+            authDomain: "operator-machine-1d822.firebaseapp.com",
+            projectId: "operator-machine-1d822",
+            storageBucket: "operator-machine-1d822.firebasestorage.app",
+            messagingSenderId: "534044217325",
+            appId: "1:534044217325:web:804b3b39f8c5d1a9a0a1e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.docRefApp = doc(db, "central_notas", "dados_gerais");
+        window.docRefTratativas = doc(db, "central_tratativas", "historico_geral");
+
+        window.syncWithFirebaseGeral = async function() {
+    try {
+        await setDoc(window.docRefApp, {
+            pendingNFs: window.pendingNFs || [],
+            gestaoFinalizadasNFs: window.gestaoFinalizadasNFs || [],
+            userList: window.userList || ['bruno', 'gab', 'carlos', 'joao'],
+            motivosList: window.motivosList || ["VALIDADE CURTA", "CARTA DE CORREÇÃO", "PRORROGAÇÃO DE BOLETO", "CALCULO DE TRIBUTO", "PATRIMONIO"],
+            resetTratativasTs: window.resetTratativasTs || Number(localStorage.getItem('opm_tratativas_reset_ts')) || Date.now() + (45 * 24 * 60 * 60 * 1000),
+            lastUpdated: Date.now()
+        }, { merge: true });
+
+        await setDoc(window.docRefTratativas, {
+            tratativasSalvas: window.tratativasSalvas || [],
+            lastUpdated: Date.now()
+        }, { merge: true });
+    } catch (error) {
+        console.error("Erro na sincronização Firebase:", error);
+    }
+};
+
+        onSnapshot(window.docRefApp, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                window.pendingNFs = data.pendingNFs || [];
+                window.gestaoFinalizadasNFs = data.gestaoFinalizadasNFs || [];
+                window.userList = data.userList || ['bruno', 'gab', 'carlos', 'joao'];
+                window.motivosList = data.motivosList || ["VALIDADE CURTA", "CARTA DE CORREÇÃO", "PRORROGAÇÃO DE BOLETO", "CALCULO DE TRIBUTO", "PATRIMONIO"];
+
+                const baseTs = data.lastResetTimestamp;
+                const limite45diasMs = 45 * 24 * 60 * 60 * 1000;
+                if (!baseTs || baseTs <= Date.now() || (baseTs - Date.now() > limite45diasMs)) {
+                    const novoTs = Date.now();
+                    localStorage.setItem('opm_last_reset_timestamp', String(novoTs));
+                } else {
+                    localStorage.setItem('opm_last_reset_timestamp', String(baseTs));
+                }
+
+                if (typeof carregarOpcoesDropdownNotas === "function") carregarOpcoesDropdownNotas();
+                if (typeof carregarOpcoesUsuarios === "function") carregarOpcoesUsuarios();
+                if (typeof carregarOpcoesMotivos === "function") carregarOpcoesMotivos();
+            }
+        });
+
+        onSnapshot(window.docRefTratativas, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                window.tratativasSalvas = data.tratativasSalvas || [];
+                if (typeof renderizarTabelaTratativas === "function") renderizarTabelaTratativas();
+            }
+        });
+    </script>
+
+    <!-- Script Específico das Tratativas -->
+    <script src="tratativas.js"></script>
+</body>
+</html>
+

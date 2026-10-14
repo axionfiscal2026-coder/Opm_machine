@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Operator Machine — Gerenciamento de Fluxo</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Estilos Específicos -->
+    <link rel="stylesheet" href="gerenciamentofluxo.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">Operator Machine</span>
+        </div>
+        <div class="top-bar-actions">
+            <button type="button" class="top-bar-icon-btn" onclick="voltarParaGestao()" title="Voltar à Gestão de Notas Fiscais">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast-notification" class="toast-notification">
+        <i class="fa-solid fa-circle-check" id="toast-icon"></i> 
+        <span id="toast-msg">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="content-area-full">
+
+        <h2 class="page-main-title">HUB CENTRAL DE GERENCIAMENTO DE FLUXO</h2>
+
+        <!-- ABAS PRINCIPAIS -->
+        <nav class="tabs-container main-tabs">
+            <button type="button" class="tab-button active" id="tab-btn-hub" onclick="trocarAbaPrincipal('hub')">
+                <i class="fa-solid fa-chart-pie"></i> ABA 1 — HUB
+            </button>
+            <button type="button" class="tab-button" id="tab-btn-listas-urgencia" onclick="trocarAbaPrincipal('listas-urgencia')">
+                <i class="fa-solid fa-triangle-exclamation"></i> ABA 2 — URGENCIA
+            </button>
+        </nav>
+
+        <!-- SEÇÃO 1: ABA HUB -->
+        <section id="section-hub" class="tab-section-content active">
+
+            <!-- BUSCA GLOBAL -->
+            <div class="search-hero-card">
+                <div class="search-hero-header">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <h3>Busca Global de Nota Fiscal</h3>
+                </div>
+                <div class="search-input-wrapper">
+                    <input type="text" id="globalSearchInput" placeholder="Pesquise pelo número da NF ou nome da empresa..." onkeydown="tratarInputBuscaGlobal(event)" autocomplete="off">
+                    <button type="button" class="btn-search-hero" onclick="executarBuscaGlobal()"><i class="fa-solid fa-search"></i> Pesquisar</button>
+                </div>
+                <!-- AVISO SUTIL ABAIXO DA BARRA DE PESQUISA -->
+                <div class="search-hero-hint">
+                    <i class="fa-solid fa-circle-info"></i> Não encontrou a nota que está procurando? consulte aqui para saber se a nota está em tratativas ou se já foi finalizada!
+                </div>
+            </div>
+
+            <!-- SELETOR ESTRUTURA -->
+            <div class="sub-tabs-wrapper" id="subTabsWrapper">
+                <div class="sub-tabs-buttons">
+                    <button type="button" class="sub-tab-btn active" id="subtab-antenor" onclick="trocarAbaEstrutura('antenor')">
+                        <i class="fa-solid fa-building"></i> ANTENOR DUARTE VILELA
+                    </button>
+                    <button type="button" class="sub-tab-btn" id="subtab-filiais" onclick="trocarAbaEstrutura('filiais')">
+                        <i class="fa-solid fa-code-branch"></i> FILIAIS
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABELA ENTRADANF -->
+            <div class="form-card-container">
+                <div class="table-toolbar">
+                    <h3><i class="fa-solid fa-list"></i> Notas Aguardando Entrada — <span id="lblEstruturaHubTabela">ANTENOR DUARTE VILELA</span></h3>
+                    <button type="button" class="btn-toggle-filters" id="btnToggleFiltersHub" onclick="toggleFiltrosHub()" title="Recolher / Expandir Filtros">
+                        <i class="fa-solid fa-chevron-down" id="iconToggleFiltersHub"></i>
+                    </button>
+                </div>
+
+                <div class="filter-panel-box" id="filterPanelBoxHub">
+                    <div class="filter-grid" id="containerFiltrosHub">
+                        <div class="filter-item">
+                            <label>Buscar NF / Empresa</label>
+                            <input type="text" id="filterText" placeholder="Digite NF ou Fornecedor..." oninput="filtrarTabelaHub()">
+                        </div>
+
+                        <div class="filter-item" id="filterUnidadeBox" style="display: none;">
+                            <label>Unidade</label>
+                            <select id="filterUnidade" onchange="filtrarTabelaHub()">
+                                <option value="">Todas as Unidades</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-item">
+                            <label>Prioridade</label>
+                            <select id="filterPrioridade" onchange="filtrarTabelaHub()">
+                                <option value="">Todas</option>
+                                <option value="NORMAL">NORMAL</option>
+                                <option value="URGENTE">URGENTE</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>Ordenar Por</label>
+                            <select id="filterOrdenacao" onchange="filtrarTabelaHub()">
+                                <option value="data_desc">Recentes</option>
+                                <option value="num_crescente">N° Crescente</option>
+                                <option value="num_decrescente">N° Decrescente</option>
+                                <option value="alfabetica">Ordem Alfabética</option>
+                            </select>
+                        </div>
+                        <div class="filter-item btn-clear-box">
+                            <button type="button" class="btn-clear-filters" onclick="limparFiltrosHub()"><i class="fa-solid fa-filter-circle-xmark"></i> Limpar Filtros</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive-wrapper">
+                    <table class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>Nº NF</th>
+                                <th>Empresa</th>
+                                <th>Unidade</th>
+                                <th>Adicionado em</th>
+                                <th>Status</th>
+                                <th>Prioridade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaEntradaHubBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="paginacaoHubControls" class="pagination-wrapper"></div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO: LISTAS DE URGÊNCIA -->
+        <section id="section-listas-urgencia" class="tab-section-content" style="display: none;">
+            
+            <div class="sub-tabs-wrapper" id="subTabsUrgenciaWrapper" style="margin-bottom: 16px;">
+                <div class="sub-tabs-buttons">
+                    <button type="button" class="sub-tab-btn active" id="subtab-urg-antenor" onclick="trocarAbaEstrutura('antenor')">
+                        <i class="fa-solid fa-building"></i> ANTENOR DUARTE VILELA
+                    </button>
+                    <button type="button" class="sub-tab-btn" id="subtab-urg-filiais" onclick="trocarAbaEstrutura('filiais')">
+                        <i class="fa-solid fa-code-branch"></i> FILIAIS
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-card-container">
+                <div class="table-toolbar">
+                    <h3><i class="fa-solid fa-triangle-exclamation" style="color: #EF4444;"></i> Listas de Urgência Registradas — <span id="lblEstruturaListasUrg">ANTENOR DUARTE VILELA</span></h3>
+                    <button type="button" class="btn-save btn-icon-only" onclick="abrirFormularioCriacaoDirect('URGENCIA')" title="Nova Lista de Urgência"><i class="fa-solid fa-plus"></i></button>
+                </div>
+
+                <div class="search-lista-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="inputBuscaListasUrgencia" placeholder="Buscar por nome da lista, número da nota ou empresa..." oninput="renderizarGridListasUrgencia()">
+                </div>
+
+                <div class="cards-grid-listas" id="gridListasUrgencia"></div>
+            </div>
+        </section>
+
+        <!-- FORMULÁRIO DE CRIAÇÃO/CONSTRUÇÃO DE LISTA -->
+        <section id="section-formulario-criacao" class="tab-section-content" style="display: none;">
+            <div id="wrapperFormConstrucaoLista" class="form-card-container">
+                <div class="form-card-header">
+                    <div class="header-icon-title">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <h3 id="lblTituloFormConstrucao">CRIAR SOLICITAÇÃO DE NOTA DE URGENCIA</h3>
+                    </div>
+                </div>
+
+                <div class="sub-tabs-wrapper" id="subTabsCriacaoWrapper" style="margin-bottom: 16px;">
+                    <div class="sub-tabs-buttons">
+                        <button type="button" class="sub-tab-btn active" id="subtab-criar-antenor" onclick="trocarEstruturaCriacao('antenor')">
+                            <i class="fa-solid fa-building"></i> ANTENOR DUARTE VILELA
+                        </button>
+                        <button type="button" class="sub-tab-btn" id="subtab-criar-filiais" onclick="trocarEstruturaCriacao('filiais')">
+                            <i class="fa-solid fa-code-branch"></i> FILIAIS
+                        </button>
+                    </div>
+                </div>
+
+                <form id="formCriacaoLista" onsubmit="salvarNovaLista(event)">
+                    <input type="hidden" id="editListaId" value="">
+                    <input type="hidden" id="tipoListaAtual" value="">
+
+                    <div class="form-grid-layout" id="containerCamposFormHeader">
+                        <div class="form-group" id="groupNomeLista">
+                            <label id="lblNomeListaInput">Nome da Lista *</label>
+                            <input type="text" id="nomeListaInput" placeholder="Ex: Lista de Urgência">
+                        </div>
+
+                        <div class="form-group" id="groupCriadoPor">
+                            <label id="lblCriadoPorSelect">Solicitado por *</label>
+                            <div class="select-with-settings">
+                                <select id="selectCriadoPor" required>
+                                    <option value="">Selecione um usuário...</option>
+                                </select>
+                                <button type="button" class="btn-settings-user" onclick="abrirModal('modalGerenciarUsuarios')" title="Gerenciar Usuários Responsáveis">
+                                    <i class="fa-solid fa-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABELA SELEÇÃO NOTAS -->
+                    <div id="wrapperTabelaEntradaNfSelecao">
+                        <div class="selection-table-header" style="margin-top: 16px;">
+                            <h4><i class="fa-solid fa-boxes-stacked"></i> Seleção de Notas Disponíveis (<span id="lblEstruturaNotasDisponiveis">ANTENOR DUARTE VILELA</span>)</h4>
+                            <small id="lblAjudaSelecaoNotas">Marque as notas para incluir na lista.</small>
+                        </div>
+
+                        <!-- CAMPO DE BUSCA DENTRO DA TABELA DE SELEÇÃO -->
+                        <div class="search-lista-box" style="margin-top: 12px; margin-bottom: 12px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="inputBuscaSelecaoNotas" placeholder="Buscar por número da NF ou nome da empresa..." oninput="renderizarTabelaSelecaoNotasCriacao()">
+                        </div>
+
+                        <div class="table-responsive-wrapper">
+                            <table class="custom-data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 50px;">
+                                            <input type="checkbox" id="chkAllSelecaoLista" onclick="toggleMarcarTodasSelecao(this)">
+                                        </th>
+                                        <th>Nº NF</th>
+                                        <th>Empresa</th>
+                                        <th>Unidade</th>
+                                        <th>Data de Entrada</th>
+                                        <th>Prioridade</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaSelecaoNotasBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div id="paginacaoSelecaoControls" class="pagination-wrapper"></div>
+                    </div>
+
+                    <div class="form-footer-actions-split" style="margin-top: 20px;">
+                        <div class="footer-left-side">
+                            <button type="button" class="btn-limpar-campos" onclick="limparTodosCamposESelecao()"><i class="fa-solid fa-broom"></i> LIMPAR</button>
+                            <span class="selected-count-badge" id="lblCountNotasSelecionadas">0 nota(s) selecionada(s)</span>
+                        </div>
+                        <div class="footer-right-side">
+                            <button type="button" class="btn-cancelar" onclick="cancelarCriacaoLista()">Cancelar</button>
+                            <button type="submit" class="btn-save" id="btnSalvarListaFinal"><i class="fa-solid fa-circle-check"></i> FINALIZAR</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAIS -->
+    <div id="modalDetalhesNf" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-info"></i> Detalhes da Nota Fiscal</h3>
+                <button class="modal-close" onclick="fecharModal('modalDetalhesNf')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesNfBody"></div>
+        </div>
+    </div>
+
+    <div id="modalGerenciarUsuarios" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users-gear"></i> Gerenciar Usuários Responsáveis</h3>
+                <button class="modal-close" onclick="fecharModal('modalGerenciarUsuarios')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <label style="font-size: 0.82rem; font-weight: 800; color: var(--primary-dark);">Adicionar Novo Usuário</label>
+                <div class="user-add-inline-row">
+                    <input type="text" id="inputNovoUsuarioNome" placeholder="Ex: Maria Souza">
+                    <button type="button" class="btn-save" onclick="adicionarNovoUsuarioLista()"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+
+                <label style="font-size: 0.82rem; font-weight: 800; color: var(--primary-dark); margin-top: 16px; display: block;">Usuários Cadastrados:</label>
+                <div class="users-list-wrapper" id="containerUsuariosCadastrados"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VISUALIZAR LISTA -->
+    <div id="modalVisualizarLista" class="modal-overlay" style="display: none;">
+        <div class="modal-card report-modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clipboard-list"></i> Visualização de Lista — <span id="lblModalTituloLista">--</span></h3>
+                <button class="modal-close" onclick="fecharModal('modalVisualizarLista')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info-bar-lista" id="lblModalHeaderInfoLista"></div>
+                <div class="table-responsive-wrapper" style="max-height: 420px; overflow-y: auto; margin-top: 12px;">
+                    <table class="custom-data-table">
+                        <thead id="tabelaVisualizacaoListaHeader"></thead>
+                        <tbody id="tabelaVisualizacaoListaBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTEGRAÇÃO FIREBASE TEMPO REAL -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8LgNHTdCFMLTaD3s5J2SFQ4q4AvDEW24",
+            authDomain: "operator-machine-1d822.firebaseapp.com",
+            projectId: "operator-machine-1d822",
+            storageBucket: "operator-machine-1d822.firebasestorage.app",
+            messagingSenderId: "534044217325",
+            appId: "1:534044217325:web:804b3b39f8c5d1a9a0a1e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.docRefAppFluxo = doc(db, "central_notas", "dados_gerais");
+
+        onSnapshot(window.docRefAppFluxo, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                if (data.pendingNFs) localStorage.setItem('opm_notas_entrada', JSON.stringify(data.pendingNFs));
+                if (data.finishedNFs) localStorage.setItem('opm_notas_finalizadas_local', JSON.stringify(data.finishedNFs));
+                if (typeof window.atualizarInterfaceTempoReal === 'function') window.atualizarInterfaceTempoReal();
+            }
+        });
+    </script>
+
+    <!-- Script Principal JS -->
+    <script src="gerenciamentofluxo.js"></script>
+</body>
+</html>

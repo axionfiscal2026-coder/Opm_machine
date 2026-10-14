@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM - Operator Machine</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Específico -->
+    <link rel="stylesheet" href="conferencia.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM <span class="brand-separator">—</span> <span class="brand-subtitle">OPERATOR MACHINE</span>
+        </div>
+        <div class="top-bar-actions">
+            <!-- BOTÃO DE VOLTAR PARA A PÁGINA LOBBY -->
+            <button type="button" class="top-bar-back-btn" onclick="voltarPaginaAnterior()" title="Voltar ao Lobby">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </button>
+            
+            <!-- BOTÃO DE FORNECEDORES -->
+            <button type="button" class="top-bar-icon-btn" onclick="abrirModalFornecedores()" title="Gerenciar Cadastros de Fornecedores">
+                <i class="fa-solid fa-address-book"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- NOTIFICAÇÃO TOAST FLUTUANTE -->
+    <div id="toast-notification" class="toast-notification">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="content-area-full">
+
+        <h2 class="page-main-title">CONTROLE DE REMESSA E DEVOLUTIVA DE MALOTES</h2>
+
+        <!-- NAVEGAÇÃO PRINCIPAL -->
+        <div class="etapas-navigation-wrapper">
+            <button type="button" class="btn-etapa-tab active" id="btnTabEnvio" onclick="alternarAbaPrincipal('envio')">
+                <i class="fa-solid fa-paper-plane"></i> Novo Envio de Malote
+            </button>
+            <button type="button" class="btn-etapa-tab" id="btnTabDevolutiva" onclick="alternarAbaPrincipal('devolutiva')">
+                <i class="fa-solid fa-box-archive"></i> Conferência de Devolutiva
+            </button>
+            <button type="button" class="btn-etapa-tab btn-tab-warning" id="btnTabArmazem" onclick="alternarAbaPrincipal('armazem')">
+                <i class="fa-solid fa-warehouse"></i> HISTÓRICO
+            </button>
+        </div>
+
+        <!-- ABA 1: NOVO ENVIO / EDIÇÃO DE MALOTE -->
+        <div id="abaEnvioWrapper" class="form-card-container">
+            
+            <!-- JANELAS DE UNIDADE / UNIDADE SELEÇÃO -->
+            <div class="unit-tabs-container">
+                <button type="button" class="unit-tab-btn active" id="btnUnitAntenor" onclick="selecionarUnidade('antenor')">
+                    <i class="fa-solid fa-building"></i> ANTENOR DUARTE VILELA
+                </button>
+                <button type="button" class="unit-tab-btn" id="btnUnitFiliais" onclick="selecionarUnidade('filiais')">
+                    <i class="fa-solid fa-code-branch"></i> FILIAIS
+                </button>
+            </div>
+
+            <div class="form-card-header">
+                <div class="header-icon-title">
+                    <i class="fa-solid fa-file-export"></i>
+                    <h3 id="tituloBlocoEnvio">MONTAGEM DE MALOTE PARA SAÍDA</h3>
+                </div>
+            </div>
+
+            <form id="form-envio-malote" onsubmit="handleSalvarEnvioMalote(event)">
+                
+                <!-- SELEÇÃO DE TIPO DE ORIGEM (INTERNO / EXTERNA) -->
+                <div class="mode-selection-container" style="margin-bottom: 14px; background-color: #F1F5F9;">
+                    <label class="radio-mode-label">
+                        <input type="radio" id="radioOrigemInterno" name="tipoOrigemMalote" value="interno" checked onchange="alternarTipoOrigem('interno')">
+                        <span class="custom-radio-dot"></span>
+                        <i class="fa-solid fa-house-laptop"></i> Interno
+                    </label>
+                    <label class="radio-mode-label">
+                        <input type="radio" id="radioOrigemExterna" name="tipoOrigemMalote" value="externa" onchange="alternarTipoOrigem('externa')">
+                        <span class="custom-radio-dot"></span>
+                        <i class="fa-solid fa-globe"></i> Externa
+                    </label>
+                </div>
+
+                <div class="form-grid-top-config-4col" id="gridTopConfigEnvio">
+                    <!-- CAMPO TIPO DE VERBA -->
+                    <div class="form-group" id="groupTipoVerba">
+                        <label id="lblTipoVerba">TIPO DE VERBA *</label>
+                        <select id="envioTipoVerba" class="custom-select-native" onchange="atualizarSetorAutomatico()" required>
+                            <option value="RESTRICAO">RESTRIÇÃO</option>
+                            <option value="RECURSO_PROPRIO">RECURSO PRÓPRIO</option>
+                        </select>
+                    </div>
+
+                    <!-- CAMPO SETOR -->
+                    <div class="form-group" id="groupSetor">
+                        <label>SETOR *</label>
+                        <input type="text" id="envioSetorInput" class="input-disabled" value="PRESTAÇÃO DE CONTAS" readonly tabindex="-1">
+                        <select id="envioSetorSelect" class="custom-select-native" style="display: none;">
+                            <option value="PRESTAÇÃO DE CONTAS">PRESTAÇÃO DE CONTAS</option>
+                            <option value="FINANCEIRO">FINANCEIRO</option>
+                        </select>
+                    </div>
+
+                    <!-- CAMPO CONFERENTE / RESPONSÁVEL COM ENGRENAGEM -->
+                    <div class="form-group" id="groupResponsavel">
+                        <label id="lblResponsavel"><i class="fa-solid fa-user"></i> RESPONSÁVEL *</label>
+                        <div class="select-with-btn-wrapper">
+                            <select id="envioResponsavel" class="custom-select-native" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                            <button type="button" class="btn-gear-setting" onclick="abrirModalGerenciarResponsavel()" title="Gerenciar Usuários">
+                                <i class="fa-solid fa-gear"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CAMPO LOCAL ESTOQUE COM ENGRENAGEM -->
+                    <div class="form-group" id="groupLocalEstoque">
+                        <label id="lblLocalEstoque"><i class="fa-solid fa-boxes-stacked"></i> LOCAL ESTOQUE *</label>
+                        <div class="select-with-btn-wrapper">
+                            <select id="envioLocalEstoque" class="custom-select-native" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                            <button type="button" class="btn-gear-setting" onclick="abrirModalGerenciarEstoque()" title="Gerenciar Locais de Estoque">
+                                <i class="fa-solid fa-gear"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SELEÇÃO DO MODO DE ENTRADA DAS NOTAS -->
+                <div class="mode-selection-container">
+                    <label class="radio-mode-label">
+                        <input type="radio" id="radioModoBarcode" name="modoEntradaNf" value="barcode" checked onchange="alternarModoEntradaNf('barcode')">
+                        <span class="custom-radio-dot"></span>
+                        <i class="fa-solid fa-barcode"></i> Códigos de barras
+                    </label>
+                    <label class="radio-mode-label">
+                        <input type="radio" id="radioModoManual" name="modoEntradaNf" value="manual" onchange="alternarModoEntradaNf('manual')">
+                        <span class="custom-radio-dot"></span>
+                        <i class="fa-solid fa-keyboard"></i> Manual
+                    </label>
+                </div>
+
+                <!-- ÁREA 1: LEITOR DE CÓDIGO DE BARRAS -->
+                <div id="sectionBarcodeScanner" class="barcode-scanner-box">
+                    <div class="form-group">
+                        <div class="barcode-input-container">
+                            <input type="text" id="barcodeInput" placeholder="Aguardando bipagem da chave de acesso (44 dígitos)..." onkeydown="tratarBipagemBarcode(event)" autocomplete="off">
+                            <span class="barcode-status-tag"><i class="fa-solid fa-bolt"></i> Pronto para Bipar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÁREA 2: DIGITAÇÃO MANUAL (INTERNO / EXTERNO) -->
+                <div id="sectionManualInput" class="manual-input-box" style="display: none;">
+                    
+                    <!-- INPUT PARA ORIGEM INTERNA (NOTAS MULTIPLAS) -->
+                    <div id="boxManualInterno" class="form-group">
+                        <label>DIGITE OU COLE AS NOTAS (SEPARADAS POR VÍRGULA)</label>
+                        <div class="manual-input-container">
+                            <input type="text" id="manualNfInput" placeholder="Ex: 4234, 4356523, 54345..." onkeydown="tratarInputManualNf(event)" autocomplete="off">
+                            <button type="button" class="btn-adicionar-manual" onclick="processarDigitacaoManualNf()">
+                                <i class="fa-solid fa-plus"></i> Processar NFs
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- INPUT PARA ORIGEM EXTERNA (NOTA + FORNECEDOR OBRIGATÓRIOS) -->
+                    <div id="boxManualExterno" class="form-group" style="display: none;">
+                        <div class="manual-externo-grid">
+                            <div class="form-group">
+                                <label>NÚMERO DA NOTA FISCAL *</label>
+                                <input type="text" id="manualExtNumNf" placeholder="Ex: 3423" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>NOME DO FORNECEDOR *</label>
+                                <input type="text" id="manualExtFornecedor" placeholder="Ex: ONCOPRO DISTRIBUIDORA" autocomplete="off">
+                            </div>
+                            <button type="button" class="btn-adicionar-manual" style="height: 42px; margin-top: auto;" onclick="processarDigitacaoManualExterno()">
+                                <i class="fa-solid fa-plus"></i> Adicionar Nota
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- LISTA DE NOTAS DO MALOTE -->
+                <div class="section-sub-header">
+                    <h4><i class="fa-solid fa-receipt"></i> NOTAS FISCAIS INCLUÍDAS NO MALOTE (<span id="countNotasIncluidas">0</span>)</h4>
+                </div>
+
+                <div id="container-nfs-envio" class="nfs-included-list-box">
+                    <!-- Renderizado Dinamicamente -->
+                </div>
+
+                <div class="form-footer-actions">
+                    <div></div>
+                    <div class="footer-actions-right">
+                        <button type="button" id="btnCancelarEdicao" class="btn-limpar-form" style="display: none; background-color: #E2E8F0; color: #334155; border-color: #CBD5E1;" onclick="cancelarEdicaoMalote()">
+                            <i class="fa-solid fa-xmark"></i> Cancelar Edição
+                        </button>
+                        <button type="button" id="btnLimparMaloteForm" class="btn-limpar-form" style="display: none;" onclick="limparFormularioEnvio()">
+                            <i class="fa-solid fa-broom"></i> Limpar Malote
+                        </button>
+                        <button type="submit" id="btnSubmitEnvio" class="btn-primary-action">
+                            <i class="fa-solid fa-print"></i> Registrar e Gerar Protocolo
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ABA 2: CONFERÊNCIA DE DEVOLUTIVA -->
+        <div id="abaDevolutivaWrapper" class="form-card-container" style="display: none;">
+            <div class="form-card-header">
+                <div class="header-icon-title">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <h3>RECEBIMENTO E CONFERÊNCIA FÍSICA DE MALOTE</h3>
+                </div>
+            </div>
+
+            <!-- BARRA DE FILTROS NA DEVOLUTIVA -->
+            <div class="search-malote-bar">
+                <div class="form-group" style="flex: 2;">
+                    <label>PESQUISAR MALOTE ENVIADO (CÓDIGO / NOTA / FORNECEDOR)</label>
+                    <input type="text" id="inputPesquisaMalote" placeholder="Digite o código do malote ou o número da NF..." oninput="filtrarMalotesAbertos()">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>TIPO DE VERBA</label>
+                    <select id="filtroTipoVerbaDevolutiva" class="custom-select-native" onchange="filtrarMalotesAbertos()">
+                        <option value="">TODOS OS TIPOS</option>
+                        <option value="RESTRIÇÃO">RESTRIÇÃO</option>
+                        <option value="RECURSO PRÓPRIO">RECURSO PRÓPRIO</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label id="lblFiltroModoDevolutiva">FILTRAR POR</label>
+                    <select id="filtroModoSetorDevolutiva" class="custom-select-native" onchange="alternarModoFiltroSetor('devolutiva')">
+                        <option value="DESTINO">SETOR DESTINO</option>
+                        <option value="ORIGEM">SETOR ORIGEM</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label id="lblFiltroSetorDevolutiva">SETOR DESTINO</label>
+                    <select id="filtroSetorDevolutiva" class="custom-select-native" onchange="filtrarMalotesAbertos()">
+                        <option value="">TODOS OS SETORES</option>
+                        <option value="PRESTAÇÃO DE CONTAS">PRESTAÇÃO DE CONTAS</option>
+                        <option value="FINANCEIRO">FINANCEIRO</option>
+                        <option value="CENTRAL DE NOTAS">CENTRAL DE NOTAS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="containerMalotesParaConferencia" class="cards-malotes-list">
+                <!-- Renderizado via JS -->
+            </div>
+        </div>
+
+        <!-- ABA 3: HISTÓRICO -->
+        <div id="abaArmazemWrapper" class="form-card-container" style="display: none;">
+            <div class="form-card-header">
+                <div class="header-icon-title" style="color: var(--primary-dark);">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <h3>HISTÓRICO DE RELATÓRIOS E CONFERÊNCIAS FINALIZADAS</h3>
+                </div>
+                <!-- AVISO SIMPLES E DISCRETO DO RESET SEMANAL -->
+                <div class="timer-reset-header-box">
+                    <span class="timer-reset-simple-notice"><i class="fa-solid fa-circle-info"></i> Limpeza automática todo domingo às 23:00</span>
+                </div>
+            </div>
+
+            <div class="search-malote-bar">
+                <div class="form-group" style="flex: 2;">
+                    <label>BUSCAR NO HISTÓRICO (CÓDIGO MALOTE / Nº NF / FORNECEDOR)</label>
+                    <input type="text" id="inputPesquisaArmazem" placeholder="Digite para filtrar registros arquivados..." oninput="filtrarArmazemComResetPagina()">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label id="lblFiltroModoArmazem">FILTRAR POR</label>
+                    <select id="filtroModoSetorArmazem" class="custom-select-native" onchange="alternarModoFiltroSetor('armazem')">
+                        <option value="DESTINO">SETOR DESTINO</option>
+                        <option value="ORIGEM">SETOR ORIGEM</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1.2;">
+                    <label id="lblFiltroSetorArmazem">SETOR DESTINO</label>
+                    <select id="filtroSetorArmazem" class="custom-select-native" onchange="filtrarArmazemComResetPagina()">
+                        <option value="">TODOS OS SETORES</option>
+                        <option value="PRESTAÇÃO DE CONTAS">PRESTAÇÃO DE CONTAS</option>
+                        <option value="FINANCEIRO">FINANCEIRO</option>
+                        <option value="CENTRAL DE NOTAS">CENTRAL DE NOTAS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="containerArmazemList" class="cards-malotes-list">
+                <!-- Renderizado via JS -->
+            </div>
+
+            <!-- BARRA DE PAGINAÇÃO -->
+            <div id="paginationArmazemWrapper" class="pagination-footer-wrapper">
+                <div class="pagination-info-text" id="paginationInfoText">
+                    Mostrando 0–0 de 0 registros
+                </div>
+                <div class="pagination-controls">
+                    <button type="button" class="btn-page-nav" id="btnPagePrev" onclick="mudarPaginaArmazem(-1)">
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <span class="pagination-page-indicator" id="paginationPageIndicator">1/1</span>
+                    <button type="button" class="btn-page-nav" id="btnPageNext" onclick="mudarPaginaArmazem(1)">
+                        Próximo <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL GERENCIAR RESPONSÁVEL / CONFERENTE -->
+    <div id="modalGerenciarResponsavel" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-manage-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users-gear" style="color: var(--primary-dark);"></i> Gerenciar Usuários (Conferentes)</h3>
+                <button type="button" class="modal-close" onclick="fecharModalGerenciarResponsavel()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <label class="modal-input-label">Adicionar Novo Usuário</label>
+                <div class="modal-add-row">
+                    <input type="text" id="inputNovoResponsavel" placeholder="Ex: Maria Souza" autocomplete="off">
+                    <button type="button" class="btn-add-item-modal" onclick="adicionarNovoResponsavel()"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+
+                <label class="modal-input-label" style="margin-top: 16px;">Usuários Cadastrados:</label>
+                <div id="listaResponsaveisCadastrados" class="modal-items-list">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GERENCIAR LOCAL ESTOQUE -->
+    <div id="modalGerenciarEstoque" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-manage-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-warehouse" style="color: var(--primary-dark);"></i> Gerenciar Locais de Estoque</h3>
+                <button type="button" class="modal-close" onclick="fecharModalGerenciarEstoque()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <label class="modal-input-label">Adicionar Novo Local de Estoque</label>
+                <div class="modal-add-row">
+                    <input type="text" id="inputNovoEstoque" placeholder="Ex: ESTOQUE CENTRAL / ALMOXARIFADO" autocomplete="off">
+                    <button type="button" class="btn-add-item-modal" onclick="adicionarNovoEstoque()"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+
+                <label class="modal-input-label" style="margin-top: 16px;">Locais Cadastrados:</label>
+                <div id="listaEstoquesCadastrados" class="modal-items-list">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO DE FORNECEDORES -->
+    <div id="modalFornecedores" class="modal-overlay" style="display: none;">
+        <div class="modal-card report-modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-address-book" style="color: var(--primary-dark);"></i> Cadastro de Fornecedores (CNPJ x Nome)</h3>
+                <button type="button" class="modal-close" onclick="fecharModalFornecedores()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid-fornecedor">
+                    <div class="form-group">
+                        <label>CNPJ do Fornecedor *</label>
+                        <input type="text" id="fornCnpjInput" placeholder="Ex: 12.345.678/0001-90 ou apenas números">
+                    </div>
+                    <div class="form-group">
+                        <label>Nome do Fornecedor / Empresa *</label>
+                        <input type="text" id="fornNomeInput" placeholder="Ex: ONCOPRO DISTRIBUIDORA">
+                    </div>
+                    <button type="button" class="btn-primary-action" style="height: 42px;" onclick="salvarFornecedor()">
+                        <i class="fa-solid fa-plus"></i> Salvar
+                    </button>
+                </div>
+
+                <div class="search-box-wrapper" style="width: 100%; margin-bottom: 12px; position: relative;">
+                    <i class="fa-solid fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="text" id="searchFornecedorInput" placeholder="Consultar CNPJ ou Nome do Fornecedor..." oninput="renderizarTabelaFornecedores()" style="padding-left: 32px;">
+                </div>
+
+                <div class="table-responsive-wrapper" style="max-height: 280px; overflow-y: auto;">
+                    <table class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>CNPJ</th>
+                                <th>Nome do Fornecedor / Empresa</th>
+                                <th class="text-center" style="width: 100px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaFornecedoresBody">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ETAPA 1: CONFERENCIA DE DEVOLUCAO DE RELATORIOS -->
+    <div id="modalConferirEtapa1" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-large-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-boxes-packing"></i> Devolutiva do Malote <span id="modalEtapa1Codigo">#000</span></h3>
+                <button type="button" class="modal-close" onclick="fecharModalEtapa1()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body modal-scrollable-body">
+                <input type="hidden" id="modalEtapa1MaloteId">
+
+                <div class="transf-info-box" id="modalEtapa1MetaInfo" style="background-color: #F0F9FF; border: 1px solid #BAE6FD; padding: 12px; border-radius: 8px; font-size: 0.88rem; color: #035AA6; margin-bottom: 16px; font-weight: 700;">
+                    <!-- Meta info formatada via JS -->
+                </div>
+
+                <h4 style="font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; text-transform: uppercase;">
+                    CONFERENCIA DE DEVOLUCAO DE RELATORIOS:
+                </h4>
+
+                <div class="table-responsive-wrapper">
+                    <table class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>Nº NF</th>
+                                <th>FORNECEDOR</th>
+                                <th class="text-center">
+                                    <div class="header-bulk-select-wrapper">
+                                        <span>VIA CARIMBADA?</span>
+                                        <select id="bulkViaCarimbadaSelect" class="select-header-bulk" onchange="marcarTodosEtapa1('viaCarimbada', this.value)">
+                                            <option value="">TODOS...</option>
+                                            <option value="SIM">TODOS SIM</option>
+                                            <option value="NAO">TODOS NÃO</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="header-bulk-select-wrapper">
+                                        <span>DEVOLVIDA?</span>
+                                        <select id="bulkDevolvidaSelect" class="select-header-bulk" onchange="marcarTodosEtapa1('devolvida', this.value)">
+                                            <option value="">TODOS...</option>
+                                            <option value="SIM">TODOS SIM</option>
+                                            <option value="NAO">TODOS NÃO</option>
+                                        </select>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEtapa1">
+                            <!-- Renderizado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group" style="margin-top: 16px;">
+                    <label>OBSERVAÇÕES DO RECEBIMENTO</label>
+                    <textarea id="obsEtapa1" rows="3" placeholder="Descreva se algo veio faltante ou rasurado..."></textarea>
+                </div>
+
+                <div class="modal-footer-flex">
+                    <button type="button" class="btn-modal-sec" onclick="fecharModalEtapa1()">Cancelar</button>
+                    <button type="button" class="btn-modal-pri" onclick="avancarParaEtapa2()">
+                        Próxima Etapa <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ETAPA 2: CONFERENCIA DE EXTORNO DE NOTAS FISCAIS -->
+    <div id="modalConferirEtapa2" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-large-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clipboard-check"></i> Finalização da Conferência — Malote <span id="modalEtapa2Codigo">#000</span></h3>
+                <button type="button" class="modal-close" onclick="fecharModalEtapa2()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body modal-scrollable-body">
+                <div class="transf-info-box" id="modalEtapa2MetaInfo" style="background-color: #F0F9FF; border: 1px solid #BAE6FD; padding: 12px; border-radius: 8px; font-size: 0.88rem; color: #035AA6; margin-bottom: 16px; font-weight: 700;">
+                    <!-- Meta info via JS -->
+                </div>
+
+                <h4 style="font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; text-transform: uppercase;">
+                    CONFERENCIA DE EXTORNO DE NOTAS FISCAIS:
+                </h4>
+
+                <div class="table-responsive-wrapper">
+                    <table class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>Nº NF</th>
+                                <th>FORNECEDOR</th>
+                                <th class="text-center">
+                                    <div class="header-bulk-select-wrapper">
+                                        <span>NOTA ESTORNADA?</span>
+                                        <select id="bulkEstornadaSelect" class="select-header-bulk" onchange="marcarTodosEtapa2Estorno(this.value)">
+                                            <option value="">TODOS...</option>
+                                            <option value="SIM">TODOS SIM</option>
+                                            <option value="NAO">TODOS NÃO</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th class="text-center">STATUS NOTA FISCAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEtapa2">
+                            <!-- Renderizado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-footer-flex" style="margin-top: 24px;">
+                    <button type="button" class="btn-modal-sec" id="btnVoltarEtapa2" onclick="voltarParaEtapa1()">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar Etapa
+                    </button>
+                    <button type="button" class="btn-modal-pri" style="background-color: var(--success-green);" onclick="finalizarConferenciaArmazem()">
+                        <i class="fa-solid fa-check-double"></i> FINALIZAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE & SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8lgNHTdCfMLtAD3s5J2SFQ4q4AvDEW24",
+            authDomain: "operator-machine-1d822.firebaseapp.com",
+            projectId: "operator-machine-1d822",
+            storageBucket: "operator-machine-1d822.firebasestorage.app",
+            messagingSenderId: "534044217325",
+            appId: "1:534044217325:web:804b3b39f8c5d1a9a0a1e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.docRefMalotes = doc(db, "central_notas", "malotes_historico");
+        window.docRefApp = doc(db, "central_notas", "dados_gerais");
+        window.docRefDevolucoes = doc(db, "central_devolucoes", "historico_geral");
+
+        window.syncMalotesFirebase = async function() {
+            try {
+                window.isSavingLocal = true;
+                await setDoc(window.docRefMalotes, {
+                    malotesList: window.malotesList || [],
+                    fornecedoresMap: window.fornecedoresMap || {},
+                    responsaveisList: window.responsaveisList || [],
+                    estoquesList: window.estoquesList || [],
+                    nextResetTimestamp: window.nextResetTimestamp || 0,
+                    lastUpdated: Date.now()
+                }, { merge: true });
+
+                await setDoc(window.docRefApp, {
+                    fornecedoresMap: window.fornecedoresMap || {}
+                }, { merge: true });
+            } catch (error) {
+                console.error("Erro ao sincronizar dados no Firebase:", error);
+            } finally {
+                setTimeout(() => { window.isSavingLocal = false; }, 1000);
+            }
+        };
+
+        window.forcarExclusaoFornecedorFirebase = async function(nomeExcluido) {
+            try {
+                const fNomesUnicos = Array.from(new Set(Object.values(window.fornecedoresMap || {}))).filter(n => n.toLowerCase() !== nomeExcluido.toLowerCase());
+                
+                await setDoc(window.docRefApp, {
+                    fornecedoresMap: window.fornecedoresMap || {}
+                }, { merge: true });
+
+                await updateDoc(window.docRefDevolucoes, {
+                    fornecedoresList: fNomesUnicos
+                });
+            } catch (error) {
+                console.error("Erro ao excluir fornecedor no Firebase:", error);
+            }
+        };
+
+        onSnapshot(window.docRefMalotes, (docSnapshot) => {
+            if (window.isSavingLocal) return;
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                if (data.malotesList) {
+                    window.malotesList = data.malotesList;
+                    localStorage.setItem('opm_malotes_list', JSON.stringify(data.malotesList));
+                }
+                if (data.fornecedoresMap) {
+                    window.fornecedoresMap = data.fornecedoresMap;
+                    localStorage.setItem('opm_fornecedores_map', JSON.stringify(data.fornecedoresMap));
+                }
+                if (data.responsaveisList) {
+                    window.responsaveisList = data.responsaveisList;
+                    localStorage.setItem('opm_responsaveis_list', JSON.stringify(data.responsaveisList));
+                }
+                if (data.estoquesList) {
+                    window.estoquesList = data.estoquesList;
+                    localStorage.setItem('opm_estoques_list', JSON.stringify(data.estoquesList));
+                }
+                if (data.nextResetTimestamp) {
+                    window.nextResetTimestamp = data.nextResetTimestamp;
+                    localStorage.setItem('opm_next_reset_ts', data.nextResetTimestamp);
+                }
+                if (typeof renderizarModulos === "function") renderizarModulos();
+            }
+        });
+    </script>
+
+    <script src="conferencia.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPM — OPERATOR MACHINE V2</title>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS do Lobby -->
+    <link rel="stylesheet" href="lobby.css">
+</head>
+<body>
+
+    <!-- FAIXA SUPERIOR DE NAVEGAÇÃO -->
+    <header class="top-nav-bar">
+        <div class="top-bar-brand">
+            OPM
+        </div>
+        <button type="button" class="btn-logout" onclick="fazerLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
+    </header>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="lobby-container">
+        <div class="lobby-header-text">
+            <h2>PAINEL PRINCIPAL DE GESTÃO</h2>
+            <p>Selecione o módulo que deseja acessar para gerenciar suas operações</p>
+        </div>
+
+        <!-- ESTRUTURA DO CARROSSEL COM SETAS LATERAIS -->
+        <div class="carousel-wrapper">
+            
+            <!-- SETA ESQUERDA TRANSPARENTE -->
+            <button type="button" class="carousel-nav-btn prev-btn" id="btnPrevLobby" onclick="mudarPaginaLobby(-1)" title="Anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <!-- CONTAINER DOS CARDS -->
+            <div class="cards-carousel-container">
+                <div class="lobby-cards-grid" id="lobbyCardsGrid">
+
+                    <!-- CARD 1: CRONOGRAMA -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('cronograma')">
+                        <div class="card-icon-box color-cronograma">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Cronograma</h3>
+                            <p>Planejamento temporal, prazos de entrega e agendamentos.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: ENTRADA NF -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('entrada-nf')">
+                        <div class="card-icon-box color-entrada">
+                            <i class="fa-solid fa-file-invoice"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Entrada NF</h3>
+                            <p>Registro, controle e recebimento das notas fiscais de entrada.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: NF FINALIZADAS -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('nf-finalizadas')">
+                        <div class="card-icon-box color-finalizadas">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>NF Finalizadas</h3>
+                            <p>Histórico e consulta de notas fiscais concluídas no sistema.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 4: TRATATIVAS -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('tratativas')">
+                        <div class="card-icon-box color-tratativas">
+                            <i class="fa-solid fa-comments-dollar"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Tratativas</h3>
+                            <p>Acompanhamento de pendências, acordos e tratativas com fornecedores.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 5: CONFERÊNCIA DEVOLUÇÃO -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('conferencia-devolucao')">
+                        <div class="card-icon-box color-devolucao">
+                            <i class="fa-solid fa-boxes-packing"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Conferência Devolução</h3>
+                            <p>Gestão e verificação do fluxo de devolução de mercadorias.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 6: VISÃO GERAL -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('visao-geral')">
+                        <div class="card-icon-box color-visaogeral">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Visão Geral</h3>
+                            <p>Panorama consolidado das operações e indicadores analíticos.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 7: MODELO CARTAS -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('modelo-cartas')">
+                        <div class="card-icon-box color-cartas">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Modelo Cartas</h3>
+                            <p>Emissão e geração de cartas de correção e comunicados oficiais.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 8: CALCULADORA -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('calculadora')">
+                        <div class="card-icon-box color-calculadora">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Calculadora</h3>
+                            <p>Ferramenta rápida para cálculos operacionais e tributários.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 9: BLOCO DE NOTAS -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('painel-principal')">
+                        <div class="card-icon-box color-painel">
+                            <i class="fa-solid fa-note-sticky"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Bloco de Notas</h3>
+                            <p>Anotações rápidas, lembretes operacionais e rascunhos diários.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- CARD 10: CONSULTA PRODUTOS -->
+                    <div class="lobby-card-portrait" onclick="navegarPara('consulta-produtos')">
+                        <div class="card-icon-box color-produtos">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                        <div class="card-body">
+                            <h3>Consulta Produtos</h3>
+                            <p>Consulte o catálogo de produtos, códigos e especificações.</p>
+                        </div>
+                        <div class="card-footer-action">
+                            <span>ACESSAR MÓDULO</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SETA DIREITA TRANSPARENTE -->
+            <button type="button" class="carousel-nav-btn next-btn" id="btnNextLobby" onclick="mudarPaginaLobby(1)" title="Próximo">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+        </div>
+
+        <!-- INDICADOR DE PÁGINAS EM PONTOS -->
+        <div class="pagination-dots" id="dotsContainer"></div>
+
+    </main>
+
+    <!-- JS do Lobby -->
+    <script src="lobby.js"></script>
+</body>
+</html>
